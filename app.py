@@ -1,4 +1,6 @@
 from fastapi import FastAPI,HTTPException
+import python.database
+import python.models
 
 app = FastAPI()
 
