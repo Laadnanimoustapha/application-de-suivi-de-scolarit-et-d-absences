@@ -1,10 +1,7 @@
-// ============================================================
-//  PFE — Frontend API Client
-//  Connects to: https://castel47-pfe-backend.hf.space
+// PFE — Frontend API Client
 
 const API = (() => {
-
-  const BASE_URL = "https://castel47-pfe-backend.hf.space";
+  const BASE_URL = "";
 
   async function request(endpoint, options = {}) {
     const url = `${BASE_URL}${endpoint}`;
@@ -23,12 +20,9 @@ const API = (() => {
 
     try {
       const response = await fetch(url, config);
-
-      // Parse JSON body (FastAPI always returns JSON)
       const data = await response.json();
 
       if (!response.ok) {
-        // FastAPI validation errors (422) carry detail info
         const errorMsg =
           data.detail
             ? (Array.isArray(data.detail)
@@ -45,14 +39,10 @@ const API = (() => {
     }
   }
 
-  // ── Endpoint methods ───────────────────────────────────────
-
-  /** GET /  —  Check if the backend is alive */
   async function checkServerStatus() {
     return request("/");
   }
 
-  /** POST /login/etudiant  —  Student login */
   async function loginEtudiant(email, password) {
     return request("/login/etudiant", {
       method: "POST",
@@ -60,10 +50,6 @@ const API = (() => {
     });
   }
 
-  /**
-   * POST /login/professeur  —  Professor login
-   * (Add this route to app.py when ready)
-   */
   async function loginProfesseur(email, password) {
     return request("/login/professeur", {
       method: "POST",
@@ -71,10 +57,6 @@ const API = (() => {
     });
   }
 
-  /**
-   * POST /login/admin  —  Admin login
-   * (Add this route to app.py when ready)
-   */
   async function loginAdmin(username, password) {
     return request("/login/admin", {
       method: "POST",
@@ -82,19 +64,15 @@ const API = (() => {
     });
   }
 
-  // ── Session / Auth helpers ─────────────────────────────────
-
-  /** Save user session after successful login */
   function saveSession(role, userData) {
     const session = {
-      role,          // "etudiant" | "professeur" | "admin"
+      role,
       ...userData,
       loggedInAt: new Date().toISOString(),
     };
     localStorage.setItem("pfe_session", JSON.stringify(session));
   }
 
-  /** Retrieve the current session (or null) */
   function getSession() {
     const raw = localStorage.getItem("pfe_session");
     if (!raw) return null;
@@ -105,19 +83,14 @@ const API = (() => {
     }
   }
 
-  /** Destroy session (logout) */
   function clearSession() {
     localStorage.removeItem("pfe_session");
   }
 
-  /** Check if a user is currently logged in */
   function isLoggedIn() {
     return getSession() !== null;
   }
 
-  // ── Navigation helpers ─────────────────────────────────────
-
-  /** Redirect to the correct dashboard based on role */
   function redirectToDashboard(role) {
     const dashboards = {
       etudiant:   "../templates/dashboard_eleve.html",
@@ -128,32 +101,17 @@ const API = (() => {
     window.location.href = target;
   }
 
-  /** Redirect to login page if not authenticated */
   function requireAuth() {
     if (!isLoggedIn()) {
       window.location.href = "../templates/login.html";
     }
   }
 
-  /** Logout and redirect to login page */
   function logout() {
     clearSession();
     window.location.href = "../templates/login.html";
   }
 
-  // ── Unified login handler ──────────────────────────────────
-
-  /**
-   * Handles the complete login flow:
-   *  1. Calls the right endpoint based on role
-   *  2. Checks the response status
-   *  3. Saves session & redirects on success
-   *  4. Returns an error message on failure
-   *
-   * @param {"etudiant"|"professeur"|"admin"} role
-   * @param {Object} credentials - { email, password } or { username, password }
-   * @returns {Promise<{success: boolean, message: string}>}
-   */
   async function login(role, credentials) {
     let result;
 
@@ -171,12 +129,10 @@ const API = (() => {
         return { success: false, message: "Unknown role" };
     }
 
-    // Network / server error
     if (!result.success) {
       return { success: false, message: result.error };
     }
 
-    // Backend returned a response — check status field
     const status = result.data.statu || result.data.status;
 
     if (status && status.toLowerCase().includes("success")) {
@@ -188,7 +144,6 @@ const API = (() => {
     return { success: false, message: status || "Login failed" };
   }
 
-  // ── Public API ─────────────────────────────────────────────
   return {
     BASE_URL,
     checkServerStatus,
@@ -206,12 +161,27 @@ const API = (() => {
   };
 })();
 
-// ── Startup: verify backend connection ───────────────────────
+// Auth Guard Functions (Moved from chek-login.js)
+function checkAlreadyLoggedIn() {
+  const session = API.getSession();
+  if (session && session.role) {
+    API.redirectToDashboard(session.role);
+  }
+}
+
+function requireLogin() {
+  API.requireAuth();
+}
+
+function getCurrentUser() {
+  return API.getSession();
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const res = await API.checkServerStatus();
   if (res.success) {
-    console.log("✅ Backend connected:", res.data);
+    console.log("Backend connected:", res.data);
   } else {
-    console.warn("⚠️  Backend unreachable:", res.error);
+    console.warn("Backend unreachable:", res.error);
   }
 });
