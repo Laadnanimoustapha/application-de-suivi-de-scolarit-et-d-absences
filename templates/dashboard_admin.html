@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scolarité - Dashboard Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-mortarboard-fill"></i> Gestion Scolarité</a>
+            <div class="d-flex text-white">
+                <span class="me-3">Bienvenue, <strong>Admin</strong></span>
+                <a href="/" class="btn btn-outline-light btn-sm">Déconnexion</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4 text-secondary">Tableau de Bord Administrateur</h2>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="display-4 text-primary mb-3">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h5 class="card-title">Utilisateurs</h5>
+                        <p class="text-muted">Inscrire des élèves, professeurs ou modifier leurs accès.</p>
+                        <button class="btn btn-outline-primary w-100">Gérer les comptes</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="display-4 text-success mb-3">
+                            <i class="bi bi-door-open-fill"></i>
+                        </div>
+                        <h5 class="card-title">Classes & Matières</h5>
+                        <p class="text-muted">Ajouter des nouvelles classes ou configurer les coefficients.</p>
+                        <button class="btn btn-outline-success w-100">Gérer les classes</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="display-4 text-warning mb-3">
+                            <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                        </div>
+                        <h5 class="card-title">Bulletins & Rapports</h5>
+                        <p class="text-muted">Générer les PDF des notes et suivre les moyennes générales.</p>
+                        <button class="btn btn-outline-warning w-100">Générer les rapports</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="alert alert-info border-0 shadow-sm">
+                    <i class="bi bi-info-circle-fill me-2"></i> 
+                    Système connecté avec succès à la base de données <strong>Aiven Cloud</strong>.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
