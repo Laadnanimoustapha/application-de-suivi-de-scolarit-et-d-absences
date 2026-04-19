@@ -9,6 +9,9 @@ DATABASE_KEY = os.getenv("DATABASE")
 if not DATABASE_KEY:
     raise ValueError("The 'DATABASE' environment variable is not set. Please set it in your environment or in a .env file.")
 
+if DATABASE_KEY.startswith("mysql://"):
+    DATABASE_KEY = DATABASE_KEY.replace("mysql://", "mysql+mysqlconnector://", 1)
+
 engine = create_engine(DATABASE_KEY, connect_args={"ssl":{}}, pool_pre_ping =True , pool_recycle = 300)
 
 def check_users (username,password): # check if the user has an account 
