@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, text
 
 DATABASE_KEY = os.getenv("DATABASE")
 
-engine = create_engine(DATABASE_KEY, pool_pre_ping =True , pool_recycle = 300)
+engine = create_engine(DATABASE_KEY, connect_args={"ssl":{}}, pool_pre_ping =True , pool_recycle = 300)
 
 def check_users (username,password):
     with engine.connect() as conn:
