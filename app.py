@@ -1,5 +1,5 @@
 from fastapi import FastAPI,HTTPException
-import python.database
+from python.database import *
 import python.models
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,3 +15,10 @@ app.add_middleware(
 @app.get("/")
 def main_function():
     return {"statu":"server is runing"}
+
+@app.post("/login/etudiant")
+def login_etudiant(etudiant: dict):
+    if check_etudiant(etudiant["email"],etudiant["password"]):
+        return {"statu":"login successfully"}
+    else:
+        return {"statu":"login failed"}
