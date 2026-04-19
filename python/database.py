@@ -1,7 +1,13 @@
 import os
 from sqlalchemy import create_engine, text 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DATABASE_KEY = os.getenv("DATABASE")
+
+if not DATABASE_KEY:
+    raise ValueError("The 'DATABASE' environment variable is not set. Please set it in your environment or in a .env file.")
 
 engine = create_engine(DATABASE_KEY, connect_args={"ssl":{}}, pool_pre_ping =True , pool_recycle = 300)
 
