@@ -1,13 +1,11 @@
 // ============================================================
 //  PFE — Frontend API Client
 //  Connects to: https://castel47-pfe-backend.hf.space
-// ============================================================
 
 const API = (() => {
-  // ── Configuration ──────────────────────────────────────────
+
   const BASE_URL = "https://castel47-pfe-backend.hf.space";
 
-  // ── Generic request helper ─────────────────────────────────
   async function request(endpoint, options = {}) {
     const url = `${BASE_URL}${endpoint}`;
 
