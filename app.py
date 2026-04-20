@@ -30,7 +30,7 @@ def login_professeur(professeur: dict):
 
 @app.post("/login/admin")
 def login_admin(admin: dict):
-    if check_users(admin["username"],admin["password"]):
+    if check_admin(admin["username"],admin["password"]):
         return {"statu":"login successfully"}
     else:
         return {"statu":"login failed"}
