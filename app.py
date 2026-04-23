@@ -1,36 +1,40 @@
-from fastapi import FastAPI,HTTPException
-from python.database import *
-import python.models
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from flask import Flask, request, jsonify, render_template
+# J'importe tes fonctions de base de données (comme dans ton code)
+from python.database import check_etudiant, check_professeur, check_admin
 
-app = FastAPI()
+app = Flask(__name__)
 
-# Serve static files (JS, CSS)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# --- ROUTES API (Ce que tu avais fait en FastAPI) ---
 
-# end points
-@app.get("/")
+@app.route("/")
 def main_function():
-    return {"statu":"server is runing"}
+    # Pour l'instant on laisse ça, mais plus tard ça pourrait être : return render_template("login.html")
+    return jsonify({"statu": "server is running"})
 
-@app.post("/login/etudiant")
-def login_etudiant(etudiant: dict):
-    if check_etudiant(etudiant["email"],etudiant["password"]):
-        return {"statu":"login successfully"}
+@app.route("/login/etudiant", methods=["POST"])
+def login_etudiant():
+    # En Flask, on récupère les données JSON envoyées par le front-end comme ça :
+    data = request.get_json() 
+    if check_etudiant(data["email"], data["password"]):
+        return jsonify({"statu": "login successfully"})
     else:
-        return {"statu":"login failed"}
+        return jsonify({"statu": "login failed"})
 
-@app.post("/login/professeur")
-def login_professeur(professeur: dict):
-    if check_professeur(professeur["email"],professeur["password"]):
-        return {"statu":"login successfully"}
+@app.route("/login/professeur", methods=["POST"])
+def login_professeur():
+    data = request.get_json()
+    if check_professeur(data["email"], data["password"]):
+        return jsonify({"statu": "login successfully"})
     else:
-        return {"statu":"login failed"}
+        return jsonify({"statu": "login failed"})
 
-@app.post("/login/admin")
-def login_admin(admin: dict):
-    if check_admin(admin["username"],admin["password"]):
-        return {"statu":"login successfully"}
+@app.route("/login/admin", methods=["POST"])
+def login_admin():
+    data = request.get_json()
+    if check_admin(data["username"], data["password"]):
+        return jsonify({"statu": "login successfully"})
     else:
-        return {"statu":"login failed"}
+        return jsonify({"statu": "login failed"})
+
+if __name__ == "__main__":
+    app.run(debug=True)
