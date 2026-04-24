@@ -12,8 +12,7 @@ if not DATABASE_KEY:
 if DATABASE_KEY.startswith("mysql://"):
     DATABASE_KEY = DATABASE_KEY.replace("mysql://", "mysql+mysqlconnector://", 1)
 
-engine = create_engine(DATABASE_KEY, connect_args={"ssl":{}}, pool_pre_ping =True , pool_recycle = 300)
-
+engine = create_engine(DATABASE_KEY, pool_pre_ping=True, pool_recycle=300)
 
 def check_etudiant(email,password): # check if the student has an account 
     with engine.connect() as conn:
