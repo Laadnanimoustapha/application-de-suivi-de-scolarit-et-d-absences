@@ -33,13 +33,18 @@ def login_professeur():
 
 @app.route("/login/admin", methods=["POST"])
 def login_admin():
-    username = request.form.get("username")
-    password = request.form.get("password")
+    try:
+        username = request.form.get("username")
+        password = request.form.get("password")
+        
+        if check_admin(username, password):
+            return redirect(url_for("admin_dash"))
+        else:
+            return render_template("login.html", error="Identifiants Administrateur incorrects")
     
-    if check_admin(username, password):
-        return redirect(url_for("admin_dash"))
-    else:
-        return render_template("login.html", error="Identifiants Administrateur incorrects")
+    except Exception as e:
+        # S'il y a une erreur avec la base de données, elle s'affichera ici !
+        return f"<h1>ERREUR TROUVÉE :</h1> <p>{str(e)}</p>"
 
 # --- LES ROUTES DES DASHBOARDS ---
 
