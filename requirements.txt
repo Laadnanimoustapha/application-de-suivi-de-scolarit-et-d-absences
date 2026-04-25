@@ -1,7 +1,5 @@
-fastapi
-uvicorn[standard]
-flask
-flask-sqlalchemy
+Flask
+SQLAlchemy
 mysql-connector-python
 python-dotenv
 gunicorn
