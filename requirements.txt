@@ -1,0 +1,7 @@
+Flask
+SQLAlchemy
+mysql-connector-python
+python-dotenv
+gunicorn
+pandas
+reportlab
