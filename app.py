@@ -47,11 +47,6 @@ def login_admin():
         return f"<h1>ERREUR TROUVÉE :</h1> <p>{str(e)}</p>"
 
 # --- LES ROUTES DES DASHBOARDS ---
-
-@app.route("/admin/dashboard")
-def admin_dash():
-    return render_template("dashboard_admin.html")
-
 @app.route("/prof/dashboard")
 def prof_dash():
     return render_template("dashboard_prof.html")
@@ -59,6 +54,27 @@ def prof_dash():
 @app.route("/eleve/dashboard")
 def eleve_dash():
     return render_template("dashboard_eleve.html")
+# ---------------------------------------------------------------------------------
+# ------------ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
+# ---------------------------------------------------------------------------------
+@app.route("/admin/dashboard")
+def admin_dash():
+    return render_template("admin/dashboard_admin.html")
+# --- ROUTES GESTION ADMIN ---
+
+@app.route("/admin/eleves")
+def gestion_eleves():
+    return render_template("admin/gestion_eleves.html")
+
+@app.route("/admin/profs")
+def gestion_profs():
+    return render_template("admin/gestion_profs.html")
+
+@app.route("/admin/absences")
+def gestion_absences():
+    return render_template("admin/gestion_absences.html")
+# -----------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
