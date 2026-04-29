@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white fw-bold">
+            <i class="bi bi-pencil-square me-2"></i>Modifier le dossier de {{ prof.nom }} {{ prof.prenom }}
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                
+                <h6 class="text-primary border-bottom pb-2 mb-3">Informations Personnelles</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Nom</label>
+                        <input type="text" class="form-control" name="nom" value="{{ prof.nom }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Prénom</label>
+                        <input type="text" class="form-control" name="prenom" value="{{ prof.prenom }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Date de naissance</label>
+                        <input type="date" class="form-control" name="date_naissance" value="{{ prof.date_naissance }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Sexe</label>
+                        <select class="form-select" name="sexe" required>
+                            <option value="M" {% if prof.sexe == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if prof.sexe == 'F' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-muted">Adresse</label>
+                        <input type="text" class="form-control" name="adresse" value="{{ prof.adresse }}">
+                    </div>
+                </div>
+
+                <h6 class="text-primary border-bottom pb-2 mb-3">Informations Professionnelles</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Matière</label>
+                        <select class="form-select" name="matiere">
+                            <option value="Maths" {% if prof.matiere == 'Maths' %}selected{% endif %}>Mathématiques</option>
+                            <option value="Français" {% if prof.matiere == 'Français' %}selected{% endif %}>Langue Française</option>
+                            <option value="Arabe" {% if prof.matiere == 'Arabe' %}selected{% endif %}>Langue Arabe</option>
+                            <option value="Anglais" {% if prof.matiere == 'Anglais' %}selected{% endif %}>Langue Anglaise</option>
+                            <option value="Physique-Chimie" {% if prof.matiere == 'Physique-Chimie' %}selected{% endif %}>Physique-Chimie (PC)</option>
+                            <option value="SVT" {% if prof.matiere == 'SVT' %}selected{% endif %}>Sciences de la Vie et de la Terre (SVT)</option>
+                            <option value="Education-Islamique" {% if prof.matiere == 'Education-Islamique' %}selected{% endif %}>Éducation Islamique</option>
+                            <option value="Histoire-Geo" {% if prof.matiere == 'Histoire-Geo' %}selected{% endif %}>Histoire-Géographie</option>
+                            <option value="Philosophie" {% if prof.matiere == 'Philosophie' %}selected{% endif %}>Philosophie</option>
+                            <option value="Informatique" {% if prof.matiere == 'Informatique' %}selected{% endif %}>Informatique</option>
+                            <option value="EPS" {% if prof.matiere == 'EPS' %}selected{% endif %}>Éducation Physique et Sportive (EPS)</option> 
+                            
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Email</label>
+                        <input type="email" class="form-control" name="email" value="{{ prof.email }}" required>
+                    </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Téléphone </label>
+                        <input type="tel" class="form-control" name="telephone" value="{{ prof.telephone }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Mot de passe</label>
+                        <input type="text" class="form-control" name="mot_de_passe" value="{{ prof.mot_de_passe }}" required>
+                    </div>
+                </div>
+                <div class="mt-5 text-end border-top pt-3">
+                    <a href="{{ url_for('gestion_profs') }}" class="btn btn-light me-2">Annuler</a>
+                    <button type="submit" class="btn btn-success px-5 fw-bold">
+                        <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
