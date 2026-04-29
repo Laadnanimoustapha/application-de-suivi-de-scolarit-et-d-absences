@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for
 from python.database import check_etudiant, check_professeur, check_admin, ajouter_eleve,get_tous_les_eleves,supprimer_ele,get_eleve_by_id, modifier_eleve_db, ajouter_prof, get_tous_les_profs, supprimer_pr
 from python.database import supprimer_pr, get_prof_by_id, modifier_prof_db
+from python.database import compter_eleves, compter_profs
 app = Flask(__name__)
 
 @app.route("/")
@@ -57,9 +58,18 @@ def eleve_dash():
 # ---------------------------------------------------------------------------------
 # ------------ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
 # ---------------------------------------------------------------------------------
-@app.route("/admin/dashboard")
+@app.route("/admin/dashboard") # (Vérifie le nom exact de ta route)
 def admin_dash():
-    return render_template("admin/dashboard_admin.html")
+    # On calcule les vrais chiffres
+    total_eleves = compter_eleves()
+    total_profs = compter_profs()
+    total_absences = 0 # Temporaire, on l'automatisera plus tard !
+
+    # On envoie tout ça au template
+    return render_template("admin/dashboard_admin.html", 
+                           total_eleves=total_eleves, 
+                           total_profs=total_profs, 
+                           total_absences=total_absences)
 # --- ROUTES GESTION ADMIN ---
 
 @app.route("/admin/eleves", methods=["GET", "POST"])

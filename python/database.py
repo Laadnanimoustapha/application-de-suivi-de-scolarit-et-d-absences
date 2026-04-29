@@ -36,6 +36,25 @@ def check_admin(username,password): # check if the admin has an account
         query = text("SELECT * FROM admin WHERE username = :username AND password = :password")
         result = conn.execute(query,{"username" : username,"password" : password}).fetchone()
         return result is not None 
+
+def compter_eleves():
+    try:
+        with engine.connect() as conn:
+            query = text("SELECT COUNT(*) FROM eleves")
+            # scalar() renvoie juste le nombre (ex: 12) au lieu d'un dictionnaire
+            return conn.execute(query).scalar() 
+    except Exception as e:
+        print(f"Erreur comptage élèves : {e}")
+        return 0
+
+def compter_profs():
+    try:
+        with engine.connect() as conn:
+            query = text("SELECT COUNT(*) FROM professeurs")
+            return conn.execute(query).scalar()
+    except Exception as e:
+        print(f"Erreur comptage profs : {e}")
+        return 0
 #------------------------les fonctions de gestion des élèves------------------------
 # fonction pour ajouter un élève à la base de données, elle sera utilisée dans le dashboard admin pour créer des comptes élèves
 def ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, email, password, nom_tuteur, tel_tuteur):
