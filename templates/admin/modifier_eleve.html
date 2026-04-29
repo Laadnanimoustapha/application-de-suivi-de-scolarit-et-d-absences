@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white fw-bold">
+            <i class="bi bi-pencil-square me-2"></i>Modifier le dossier de {{ eleve.nom }} {{ eleve.prenom }}
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                
+                <h6 class="text-primary border-bottom pb-2 mb-3">Informations Personnelles</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Nom</label>
+                        <input type="text" class="form-control" name="nom" value="{{ eleve.nom }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Prénom</label>
+                        <input type="text" class="form-control" name="prenom" value="{{ eleve.prenom }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Date de naissance</label>
+                        <input type="date" class="form-control" name="date_naissance" value="{{ eleve.date_naissance }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Sexe</label>
+                        <select class="form-select" name="sexe" required>
+                            <option value="M" {% if eleve.sexe == 'M' %}selected{% endif %}>Garçon</option>
+                            <option value="F" {% if eleve.sexe == 'F' %}selected{% endif %}>Fille</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-muted">Adresse</label>
+                        <input type="text" class="form-control" name="adresse" value="{{ eleve.adresse }}">
+                    </div>
+                </div>
+
+                <h6 class="text-primary border-bottom pb-2 mb-3">Scolarité & Accès</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Classe</label>
+                        <select class="form-select" name="classe">
+                            <option value="1A" {% if eleve.classe == '1A' %}selected{% endif %}>1ère Année Bac</option>
+                            <option value="2A" {% if eleve.classe == '2A' %}selected{% endif %}>2ème Année Bac</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Email</label>
+                        <input type="email" class="form-control" name="email" value="{{ eleve.email }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Mot de passe</label>
+                        <input type="text" class="form-control" name="password" value="{{ eleve.mot_de_passe }}" required>
+                    </div>
+                </div>
+
+                <h6 class="text-primary border-bottom pb-2 mb-3">Contact Tuteur (Parents)</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Nom du Tuteur</label>
+                        <input type="text" class="form-control" name="nom_tuteur" value="{{ eleve.nom_tuteur }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Téléphone du Tuteur</label>
+                        <input type="tel" class="form-control" name="tel_tuteur" value="{{ eleve.tel_tuteur }}">
+                    </div>
+                </div>
+
+                <div class="mt-5 text-end border-top pt-3">
+                    <a href="{{ url_for('gestion_eleves') }}" class="btn btn-light me-2">Annuler</a>
+                    <button type="submit" class="btn btn-success px-5 fw-bold">
+                        <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

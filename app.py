@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for
-from python.database import check_etudiant, check_professeur, check_admin
-
+from python.database import check_etudiant, check_professeur, check_admin, ajouter_eleve,get_tous_les_eleves,supprimer_eleve,get_eleve_by_id, modifier_eleve_db
 app = Flask(__name__)
 
 @app.route("/")
@@ -62,14 +61,61 @@ def admin_dash():
     return render_template("admin/dashboard_admin.html")
 # --- ROUTES GESTION ADMIN ---
 
-@app.route("/admin/eleves")
+@app.route("/admin/eleves", methods=["GET", "POST"])
 def gestion_eleves():
-    return render_template("admin/gestion_eleves.html")
+    if request.method == "POST":
+        # Récupération depuis le formulaire HTML (sans le matricule)
+        nom = request.form.get("nom")
+        prenom = request.form.get("prenom")
+        date_naissance = request.form.get("date_naissance")
+        sexe = request.form.get("sexe")
+        adresse = request.form.get("adresse")
+        classe = request.form.get("classe")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        nom_tuteur = request.form.get("nom_tuteur")
+        tel_tuteur = request.form.get("tel_tuteur")
+        
+        # Envoi à la base de données
+        ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, email, password, nom_tuteur, tel_tuteur)
+        
+        # Recharge la page pour vider le formulaire
+        return redirect(url_for("gestion_eleves"))
+        # On récupère la liste de tous les élèves depuis la base de données
+    liste_eleves = get_tous_les_eleves()
+    # On envoie cette liste à notre fichier HTML (la variable s'appellera 'eleves')
+    return render_template("admin/gestion_eleves.html", eleves=liste_eleves)
+@app.route("/admin/eleves/supprimer/<int:id>")
+def route_supprimer_eleve(id):
+    # On appelle la fonction de la base de données avec l'ID
+    supprimer_eleve(id)
+    # On redirige vers la page de gestion des élèves
+    return redirect(url_for("gestion_eleves"))
+@app.route("/admin/eleves/modifier/<int:id>", methods=["GET", "POST"])
+def modifier_eleve(id):
+    # Si l'utilisateur clique sur "Enregistrer les modifications"
+    if request.method == "POST":
+        nom = request.form.get("nom")
+        prenom = request.form.get("prenom")
+        date_naissance = request.form.get("date_naissance")
+        sexe = request.form.get("sexe")
+        adresse = request.form.get("adresse")
+        classe = request.form.get("classe")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        nom_tuteur = request.form.get("nom_tuteur")
+        tel_tuteur = request.form.get("tel_tuteur")
+        
+        if modifier_eleve_db(id, nom, prenom, date_naissance, sexe, adresse, classe, email, password, nom_tuteur, tel_tuteur):
+            return redirect(url_for("gestion_eleves"))
+
+    # Si on arrive juste sur la page, on récupère les infos actuelles
+    eleve = get_eleve_by_id(id)
+    return render_template("admin/modifier_eleve.html", eleve=eleve)
 
 @app.route("/admin/profs")
 def gestion_profs():
     return render_template("admin/gestion_profs.html")
-
 @app.route("/admin/absences")
 def gestion_absences():
     return render_template("admin/gestion_absences.html")
