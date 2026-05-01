@@ -41,8 +41,20 @@
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Classe</label>
                         <select class="form-select" name="classe">
+                            <option value="TC" {% if eleve.classe == 'TC' %}selected{% endif %}>Tronc Commun</option>
                             <option value="1A" {% if eleve.classe == '1A' %}selected{% endif %}>1ère Année Bac</option>
                             <option value="2A" {% if eleve.classe == '2A' %}selected{% endif %}>2ème Année Bac</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Filière</label>
+                        <select class="form-select" name="filiere">
+                            <option value="Sciences Physiques (PC)" {% if eleve.filiere == 'Sciences Physiques (PC)' %}selected{% endif %}>Sciences Physiques (PC)</option>
+                            <option value="SVT" {% if eleve.filiere == 'SVT' %}selected{% endif %}>Sciences de la Vie et de la Terre (SVT)</option>
+                            <option value="Sciences Maths A" {% if eleve.filiere == 'Sciences Maths A' %}selected{% endif %}>Sciences Maths A</option>
+                            <option value="Sciences Maths B" {% if eleve.filiere == 'Sciences Maths B' %}selected{% endif %}>Sciences Maths B</option>
+                            <option value="Sciences Economiques" {% if eleve.filiere == 'Sciences Economiques' %}selected{% endif %}>Sciences Économiques</option>
+                            <option value="Lettres et Sciences Humaines" {% if eleve.filiere == 'Lettres et Sciences Humaines' %}selected{% endif %}>Lettres et Sciences Humaines</option>
                         </select>
                     </div>
                     <div class="col-md-4">
