@@ -82,13 +82,14 @@ def gestion_eleves():
         sexe = request.form.get("sexe")
         adresse = request.form.get("adresse")
         classe = request.form.get("classe")
+        filiere = request.form.get("filiere")
         email = request.form.get("email")
         password = request.form.get("password")
         nom_tuteur = request.form.get("nom_tuteur")
         tel_tuteur = request.form.get("tel_tuteur")
         
         # Envoi à la base de données
-        ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, email, password, nom_tuteur, tel_tuteur)
+        ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur)
         
         # Recharge la page pour vider le formulaire
         return redirect(url_for("gestion_eleves"))
@@ -112,12 +113,13 @@ def modifier_eleve(id):
         sexe = request.form.get("sexe")
         adresse = request.form.get("adresse")
         classe = request.form.get("classe")
+        filiere = request.form.get("filiere")
         email = request.form.get("email")
         password = request.form.get("password")
         nom_tuteur = request.form.get("nom_tuteur")
         tel_tuteur = request.form.get("tel_tuteur")
         
-        if modifier_eleve_db(id, nom, prenom, date_naissance, sexe, adresse, classe, email, password, nom_tuteur, tel_tuteur):
+        if modifier_eleve_db(id, nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur):
             return redirect(url_for("gestion_eleves"))
 
     # Si on arrive juste sur la page, on récupère les infos actuelles

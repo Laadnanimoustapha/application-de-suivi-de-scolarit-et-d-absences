@@ -57,14 +57,14 @@ def compter_profs():
         return 0
 #------------------------les fonctions de gestion des élèves------------------------
 # fonction pour ajouter un élève à la base de données, elle sera utilisée dans le dashboard admin pour créer des comptes élèves
-def ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, email, password, nom_tuteur, tel_tuteur):
+def ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur):
     try:
         # On utilise "engine" exactement comme tu as fait pour check_admin
         with engine.connect() as conn:
             query = text("""
                 INSERT INTO eleves 
-                (nom, prenom, date_naissance, sexe, adresse, classe, email, mot_de_passe, nom_tuteur, tel_tuteur)
-                VALUES (:nom, :prenom, :date_naissance, :sexe, :adresse, :classe, :email, :password, :nom_tuteur, :tel_tuteur)
+                (nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, mot_de_passe, nom_tuteur, tel_tuteur)
+                VALUES (:nom, :prenom, :date_naissance, :sexe, :adresse, :classe, :filiere, :email, :password, :nom_tuteur, :tel_tuteur)
             """)
             
             # On passe les variables sous forme de dictionnaire
@@ -75,6 +75,7 @@ def ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, email, pas
                 "sexe": sexe,
                 "adresse": adresse,
                 "classe": classe,
+                "filiere": filiere,
                 "email": email,
                 "password": password,
                 "nom_tuteur": nom_tuteur,
@@ -122,19 +123,19 @@ def get_eleve_by_id(id_eleve):
         print(f"Erreur lors de la récupération de l'élève : {e}")
         return None
 # fonction pour modifier les informations d'un élève dans la base de données, elle sera utilisée dans le dashboard admin pour modifier les informations d'un élève
-def modifier_eleve_db(id_eleve, nom, prenom, date_naissance, sexe, adresse, classe, email, password, nom_tuteur, tel_tuteur):
+def modifier_eleve_db(id_eleve, nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur):
     try:
         with engine.connect() as conn:
             query = text("""
                 UPDATE eleves SET 
                 nom=:nom, prenom=:prenom, date_naissance=:date_naissance, sexe=:sexe, 
-                adresse=:adresse, classe=:classe, email=:email, mot_de_passe=:password, 
+                adresse=:adresse, classe=:classe, filiere=:filiere, email=:email, mot_de_passe=:password, 
                 nom_tuteur=:nom_tuteur, tel_tuteur=:tel_tuteur
                 WHERE id = :id
             """)
             conn.execute(query, {
                 "id": id_eleve, "nom": nom, "prenom": prenom, "date_naissance": date_naissance,
-                "sexe": sexe, "adresse": adresse, "classe": classe, "email": email,
+                "sexe": sexe, "adresse": adresse, "classe": classe, "filiere": filiere, "email": email,
                 "password": password, "nom_tuteur": nom_tuteur, "tel_tuteur": tel_tuteur
             })
             conn.commit()
