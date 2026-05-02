@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for
 from python.database import check_etudiant, check_professeur, check_admin, ajouter_eleve,get_tous_les_eleves,supprimer_ele,get_eleve_by_id, modifier_eleve_db, ajouter_prof, get_tous_les_profs, supprimer_pr
-from python.database import supprimer_pr, get_prof_by_id, modifier_prof_db
+from python.database import supprimer_pr, get_prof_by_id,get_notes_by_eleve, modifier_prof_db
 from python.database import compter_eleves, compter_profs
 app = Flask(__name__)
 
@@ -125,7 +125,16 @@ def modifier_eleve(id):
     # Si on arrive juste sur la page, on récupère les infos actuelles
     eleve = get_eleve_by_id(id)
     return render_template("admin/modifier_eleve.html", eleve=eleve)
-
+@app.route("/admin/eleves/<int:id>/notes")
+def consulter_notes_eleve(id):
+    # 1. On récupère les infos de l'élève
+    eleve = get_eleve_by_id(id)
+    
+    # 2. On récupère ses notes
+    liste_notes = get_notes_by_eleve(id)
+    
+    # 3. On affiche la page
+    return render_template("admin/consulter_notes.html", eleve=eleve, notes=liste_notes)
 
 @app.route("/admin/profs", methods=["GET", "POST"])
 def gestion_profs():

@@ -145,8 +145,8 @@
                                     <small class="text-muted"><i class="bi bi-telephone-fill me-1"></i>{{ eleve.tel_tuteur }}</small>
                                 </td>
                                 <td class="text-center">
+                                    <a href="{{ url_for('consulter_notes_eleve', id=eleve.id) }}" class="btn btn-sm btn-outline-success" title="Consulter les notes"><i class="bi bi-eye"></i></a>
                                     <a href="{{ url_for('modifier_eleve', id=eleve.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-
                                     <a href="{{ url_for('supprimer_eleve', id=eleve.id) }}" 
                                     class="btn btn-sm btn-outline-danger" 
                                     onclick="return confirm('Attention : Êtes-vous sûr de vouloir supprimer définitivement cet élève ?');">
