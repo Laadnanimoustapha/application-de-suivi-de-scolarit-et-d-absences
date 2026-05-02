@@ -122,6 +122,17 @@ def get_eleve_by_id(id_eleve):
     except Exception as e:
         print(f"Erreur lors de la récupération de l'élève : {e}")
         return None
+# fonction pour récupérer les notes d'un élève par son ID, elle sera utilisée dans le dashboard admin pour afficher les notes d'un élève spécifique
+def get_notes_by_eleve(id_eleve):
+    try:
+        with engine.connect() as conn:
+            # On récupère les notes de cet élève spécifique
+            query = text("SELECT * FROM notes WHERE eleve_id = :id_eleve ORDER BY date_saisie DESC")
+            resultats = conn.execute(query, {"id_eleve": id_eleve}).mappings().fetchall()
+            return resultats
+    except Exception as e:
+        print(f"Erreur lors de la récupération des notes : {e}")
+        return []
 # fonction pour modifier les informations d'un élève dans la base de données, elle sera utilisée dans le dashboard admin pour modifier les informations d'un élève
 def modifier_eleve_db(id_eleve, nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur):
     try:
