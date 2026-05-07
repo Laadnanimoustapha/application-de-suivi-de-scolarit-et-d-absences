@@ -31,16 +31,16 @@ def check_professeur(email,password): # check if the profesor has an account
 #---------------------------------------------------------------------------------
 # ------------ LES METHODES DE L'ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
 # ---------------------------------------------------------------------------------
-def check_admin(username,password): # check if the admin has an account 
+def check_admin(email,mot_de_passe): # check if the admin has an account 
     with engine.connect() as conn:
-        query = text("SELECT * FROM admin WHERE username = :username AND password = :password")
-        result = conn.execute(query,{"username" : username,"password" : password}).fetchone()
+        query = text("SELECT * FROM utilisateur WHERE email = :email AND mot_de_passe = :mot_de_passe AND role = 'admin'")
+        result = conn.execute(query,{"email" : email,"mot_de_passe" : mot_de_passe}).fetchone()
         return result is not None 
 
 def compter_eleves():
     try:
         with engine.connect() as conn:
-            query = text("SELECT COUNT(*) FROM eleves")
+            query = text("SELECT COUNT(*) FROM utilisateur WHERE role = 'eleve'")
             # scalar() renvoie juste le nombre (ex: 12) au lieu d'un dictionnaire
             return conn.execute(query).scalar() 
     except Exception as e:
@@ -50,56 +50,63 @@ def compter_eleves():
 def compter_profs():
     try:
         with engine.connect() as conn:
-            query = text("SELECT COUNT(*) FROM professeurs")
+            query = text("SELECT COUNT(*) FROM utilisateur WHERE role = 'professeur'")
             return conn.execute(query).scalar()
     except Exception as e:
         print(f"Erreur comptage profs : {e}")
         return 0
 #------------------------les fonctions de gestion des élèves------------------------
 # fonction pour ajouter un élève à la base de données, elle sera utilisée dans le dashboard admin pour créer des comptes élèves
-def ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur):
+def ajouter_eleve(nom, prenom, sexe, email, adresse, mot_de_passe, classe_id, numero_eleve, date_naissance, nom_tuteur, tel_tuteur):
     try:
-        # On utilise "engine" exactement comme tu as fait pour check_admin
-        with engine.connect() as conn:
-            query = text("""
-                INSERT INTO eleves 
-                (nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, mot_de_passe, nom_tuteur, tel_tuteur)
-                VALUES (:nom, :prenom, :date_naissance, :sexe, :adresse, :classe, :filiere, :email, :password, :nom_tuteur, :tel_tuteur)
+        with engine.begin() as conn:
+            # 1. Insertion dans "utilisateur" avec sexe et adresse
+            query_user = text("""
+                INSERT INTO utilisateur (nom, prenom, sexe, email, adresse, mot_de_passe, role)
+                VALUES (:nom, :prenom, :sexe, :email, :adresse, :mot_de_passe, 'eleve')
             """)
+            result = conn.execute(query_user, {
+                "nom": nom, "prenom": prenom, "sexe": sexe, 
+                "email": email, "adresse": adresse, "mot_de_passe": mot_de_passe
+            })
             
-            # On passe les variables sous forme de dictionnaire
-            conn.execute(query, {
-                "nom": nom,
-                "prenom": prenom,
+            eleve_id = result.lastrowid 
+
+            # 2. Insertion dans "eleve_classe" (inchangé mais lié à l'ID ci-dessus)
+            query_eleve_classe = text("""
+                INSERT INTO eleve_classe (eleve_id, classe_id, numero_eleve, date_naissance, nom_tuteur, tel_tuteur)
+                VALUES (:eleve_id, :classe_id, :numero_eleve, :date_naissance, :nom_tuteur, :tel_tuteur)
+            """)
+            conn.execute(query_eleve_classe, {
+                "eleve_id": eleve_id,
+                "classe_id": classe_id,
+                "numero_eleve": numero_eleve,
                 "date_naissance": date_naissance,
-                "sexe": sexe,
-                "adresse": adresse,
-                "classe": classe,
-                "filiere": filiere,
-                "email": email,
-                "password": password,
                 "nom_tuteur": nom_tuteur,
                 "tel_tuteur": tel_tuteur
             })
-            
-            conn.commit() # Très important pour sauvegarder les changements dans Aiven
             return True
-            
     except Exception as e:
-        print(f"Erreur lors de l'ajout de l'élève : {e}")
+        print(f"Erreur ajout élève : {e}")
         return False
-# fonction pour récupérer tous les élèves de la base de données, elle sera utilisée dans le dashboard admin pour afficher la liste des élèves
+
+# N'oublie pas de modifier aussi get_tous_les_eleves pour afficher le sexe et l'adresse
 def get_tous_les_eleves():
     try:
         with engine.connect() as conn:
-            # On sélectionne tout, ordonné par ID décroissant (les plus récents en premier)
-            query = text("SELECT * FROM eleves ORDER BY id DESC")
-            # fetchall() récupère toutes les lignes d'un coup
-            resultats = conn.execute(query).mappings().fetchall() 
-            return resultats
+            query = text("""
+                SELECT u.id, u.nom, u.prenom, u.sexe, u.email, u.adresse,
+                       ec.numero_eleve, ec.date_naissance, ec.nom_tuteur, ec.tel_tuteur, 
+                       c.nom as nom_classe, c.filiere
+                FROM utilisateur u
+                JOIN eleve_classe ec ON u.id = ec.eleve_id
+                JOIN classe c ON ec.classe_id = c.id
+                WHERE u.role = 'eleve'
+            """)
+            return conn.execute(query).mappings().fetchall()
     except Exception as e:
-        print(f"Erreur lors de la récupération des élèves : {e}")
-        return [] # En cas d'erreur, on retourne une liste vide
+        print(f"Erreur : {e}")
+        return []
 # fonction pour supprimer un élève de la base de données, elle sera utilisée dans le dashboard admin pour supprimer un élève
 def supprimer_ele(id_eleve):
     try:

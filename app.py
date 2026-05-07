@@ -35,10 +35,10 @@ def login_professeur():
 @app.route("/login/admin", methods=["POST"])
 def login_admin():
     try:
-        username = request.form.get("username")
-        password = request.form.get("password")
+        email = request.form.get("email")
+        mot_de_passe = request.form.get("mot_de_passe")
         
-        if check_admin(username, password):
+        if check_admin(email, mot_de_passe):
             return redirect(url_for("admin_dash"))
         else:
             return render_template("login.html", error="Identifiants Administrateur incorrects")
@@ -75,28 +75,25 @@ def admin_dash():
 @app.route("/admin/eleves", methods=["GET", "POST"])
 def gestion_eleves():
     if request.method == "POST":
-        # Récupération depuis le formulaire HTML (sans le matricule)
-        nom = request.form.get("nom")
-        prenom = request.form.get("prenom")
-        date_naissance = request.form.get("date_naissance")
+        # Récupération des nouveaux champs
         sexe = request.form.get("sexe")
         adresse = request.form.get("adresse")
-        classe = request.form.get("classe")
-        filiere = request.form.get("filiere")
+        
+        # Les autres champs habituels
+        nom = request.form.get("nom")
+        prenom = request.form.get("prenom")
         email = request.form.get("email")
-        password = request.form.get("password")
+        password = request.form.get("mot_de_passe")
+        numero_eleve = request.form.get("numero_eleve")
+        classe_id = request.form.get("classe_id")
+        date_naissance = request.form.get("date_naissance")
         nom_tuteur = request.form.get("nom_tuteur")
         tel_tuteur = request.form.get("tel_tuteur")
         
-        # Envoi à la base de données
-        ajouter_eleve(nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur)
-        
-        # Recharge la page pour vider le formulaire
+        ajouter_eleve(nom, prenom, sexe, email, adresse, mot_de_passe, classe_id, numero_eleve, date_naissance, nom_tuteur, tel_tuteur)
         return redirect(url_for("gestion_eleves"))
-        # On récupère la liste de tous les élèves depuis la base de données
-    liste_eleves = get_tous_les_eleves()
-    # On envoie cette liste à notre fichier HTML (la variable s'appellera 'eleves')
-    return render_template("admin/gestion_eleves.html", eleves=liste_eleves)
+    
+    return render_template("admin/gestion_eleves.html", eleves=get_tous_les_eleves())
 @app.route("/admin/eleves/supprimer/<int:id>")
 def supprimer_eleve(id):
     # On appelle la fonction de la base de données avec l'ID
