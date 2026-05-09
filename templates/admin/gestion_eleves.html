@@ -40,8 +40,8 @@
                             <label class="form-label text-muted small fw-bold">Sexe</label>
                             <select class="form-select bg-light" name="sexe" required>
                                 <option value="" selected disabled>Choisir...</option>
-                                <option value="M">Garçon</option>
-                                <option value="F">Fille</option>
+                                <option value="M">M</option>
+                                <option value="F">F</option>
                             </select>
                         </div>
                         <div class="col-12">
@@ -52,15 +52,16 @@
                     <h6 class="text-primary border-bottom pb-2 mb-3">Scolarité & Accès</h6>
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <label class="form-label text-muted small fw-bold">Classe</label>
-                            <select class="form-select bg-light" name="classe" required>
+                            <label class="form-label text-muted small fw-bold">id_Classe</label>
+                            <input type="number" class="form-control bg-light" name="classe_id" required>
+                            <!-- <select class="form-select bg-light" name="classe" required>
                                 <option value="" selected disabled>Sélectionner la classe...</option>
                                 <option value="TC">Tronc Commun</option>
                                 <option value="1A">1ère Année Bac</option>
                                 <option value="2A">2ème Année Bac</option>
-                            </select>
+                            </select> -->
                         </div>
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted">Filière</label>
                             <select class="form-select" name="filiere" required>
                                 <option value="" selected disabled>Choisir la filière...</option>
@@ -71,14 +72,14 @@
                                 <option value="Sciences Economiques">Sciences Économiques</option>
                                 <option value="Lettres et Sciences Humaines">Lettres et Sciences Humaines</option>
                             </select>
-                        </div>
+                        </div> -->
                         <div class="col-md-4">
                             <label class="form-label text-muted small fw-bold">Email </label>
                             <input type="email" class="form-control bg-light" name="email" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-muted small fw-bold">Mot de passe provisoire</label>
-                            <input type="password" class="form-control bg-light" name="password" required>
+                            <input type="password" class="form-control bg-light" name="mot_de_passe" required>
                         </div>
                     </div>
 
@@ -120,7 +121,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light text-muted">
                         <tr>
-                            <th>identifiant</th>
+                            <th>Numéro d'élève</th>
                             <th>Nom & Prénom</th>
                             <th>Classe</th>
                             <th>Filière</th>
@@ -133,7 +134,7 @@
                         {% if eleves %}
                             {% for eleve in eleves %}
                             <tr>
-                                <td class="text-muted fw-bold">{{ eleve.id }}</td>
+                                <td class="text-muted fw-bold">{{ eleve.numero_eleve }}</td>
                                 <td>
                                     <span class="fw-bold">{{ eleve.nom }}</span> {{ eleve.prenom }}
                                 </td>
@@ -146,7 +147,7 @@
                                 </td>
                                 <td class="text-center">
                                     <a href="{{ url_for('consulter_notes_eleve', id=eleve.id) }}" class="btn btn-sm btn-outline-success" title="Consulter les notes"><i class="bi bi-eye"></i></a>
-                                    <a href="{{ url_for('modifier_eleve', id=eleve.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <a href="{{ url_for('route_modifier_eleve', id=eleve.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
                                     <a href="{{ url_for('supprimer_eleve', id=eleve.id) }}" 
                                     class="btn btn-sm btn-outline-danger" 
                                     onclick="return confirm('Attention : Êtes-vous sûr de vouloir supprimer définitivement cet élève ?');">

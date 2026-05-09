@@ -1,7 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for
-from python.database import check_etudiant, check_professeur, check_admin, ajouter_eleve,get_tous_les_eleves,supprimer_ele,get_eleve_by_id, modifier_eleve_db, ajouter_prof, get_tous_les_profs, supprimer_pr
-from python.database import supprimer_pr, get_prof_by_id,get_notes_by_eleve, modifier_prof_db
+from python.database import check_etudiant, check_professeur, check_admin, ajouter_eleve,get_tous_les_eleves,generer_numero_eleve,supprimer_ele,get_eleve_by_id, modifier_eleve_db, ajouter_prof, get_tous_les_profs, supprimer_pr
+from python.database import supprimer_pr, get_prof_by_id,get_notes_by_eleve,get_note_by_id,modifier_note_db, modifier_prof_db
 from python.database import compter_eleves, compter_profs
+import random
+from datetime import datetime
 app = Flask(__name__)
 
 @app.route("/")
@@ -83,13 +85,12 @@ def gestion_eleves():
         nom = request.form.get("nom")
         prenom = request.form.get("prenom")
         email = request.form.get("email")
-        password = request.form.get("mot_de_passe")
-        numero_eleve = request.form.get("numero_eleve")
+        mot_de_passe = request.form.get("mot_de_passe")
         classe_id = request.form.get("classe_id")
         date_naissance = request.form.get("date_naissance")
         nom_tuteur = request.form.get("nom_tuteur")
         tel_tuteur = request.form.get("tel_tuteur")
-        
+        numero_eleve = generer_numero_eleve()
         ajouter_eleve(nom, prenom, sexe, email, adresse, mot_de_passe, classe_id, numero_eleve, date_naissance, nom_tuteur, tel_tuteur)
         return redirect(url_for("gestion_eleves"))
     
@@ -101,25 +102,27 @@ def supprimer_eleve(id):
     # On redirige vers la page de gestion des élèves
     return redirect(url_for("gestion_eleves"))
 @app.route("/admin/eleves/modifier/<int:id>", methods=["GET", "POST"])
-def modifier_eleve(id):
-    # Si l'utilisateur clique sur "Enregistrer les modifications"
+def route_modifier_eleve(id):
     if request.method == "POST":
+        # On récupère tous les champs du formulaire de modification
         nom = request.form.get("nom")
         prenom = request.form.get("prenom")
-        date_naissance = request.form.get("date_naissance")
         sexe = request.form.get("sexe")
         adresse = request.form.get("adresse")
-        classe = request.form.get("classe")
-        filiere = request.form.get("filiere")
         email = request.form.get("email")
-        password = request.form.get("password")
+        mot_de_passe = request.form.get("mot_de_passe")
+        
+        classe_id = request.form.get("classe_id")
+        date_naissance = request.form.get("date_naissance")
         nom_tuteur = request.form.get("nom_tuteur")
         tel_tuteur = request.form.get("tel_tuteur")
         
-        if modifier_eleve_db(id, nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur):
-            return redirect(url_for("gestion_eleves"))
-
-    # Si on arrive juste sur la page, on récupère les infos actuelles
+        # On appelle notre nouvelle fonction à deux têtes !
+        modifier_eleve_db(id, nom, prenom, sexe, adresse, email, mot_de_passe, classe_id, date_naissance, nom_tuteur, tel_tuteur)
+        
+        return redirect(url_for("gestion_eleves"))
+    
+    # Si c'est un GET, on va chercher les infos pour remplir les cases
     eleve = get_eleve_by_id(id)
     return render_template("admin/modifier_eleve.html", eleve=eleve)
 @app.route("/admin/eleves/<int:id>/notes")
@@ -132,7 +135,21 @@ def consulter_notes_eleve(id):
     
     # 3. On affiche la page
     return render_template("admin/consulter_notes.html", eleve=eleve, notes=liste_notes)
-
+@app.route("/admin/notes/modifier/<int:id>", methods=["GET", "POST"])
+def route_modifier_note(id):
+    # 1. On récupère la note actuelle pour savoir de quel élève il s'agit
+    note_actuelle = get_note_by_id(id)
+    
+    if request.method == "POST":
+        valeur = request.form.get("valeur")
+        type_eval = request.form.get("type_evaluation")
+        semestre = request.form.get("semestre")
+        
+        if modifier_note_db(id, valeur, type_eval, semestre):
+            # On redirige vers la page des notes de l'élève
+            return redirect(url_for('consulter_notes_eleve', id=note_actuelle['eleve_id']))
+    
+    return render_template("admin/modifier_note.html", note=note_actuelle)
 @app.route("/admin/profs", methods=["GET", "POST"])
 def gestion_profs():
     if request.method == "POST":
