@@ -1,6 +1,8 @@
 import os
 from sqlalchemy import create_engine, text 
 from dotenv import load_dotenv
+from datetime import datetime
+import random
 
 load_dotenv()
 
@@ -57,7 +59,7 @@ def compter_profs():
         return 0
 #------------------------les fonctions de gestion des élèves------------------------
 # fonction pour ajouter un élève à la base de données, elle sera utilisée dans le dashboard admin pour créer des comptes élèves
-def ajouter_eleve(nom, prenom, sexe, email, adresse, mot_de_passe, classe_id, numero_eleve, date_naissance, nom_tuteur, tel_tuteur):
+def ajouter_eleve(nom, prenom, sexe, email, adresse, mot_de_passe,classe_id, numero_eleve, date_naissance, nom_tuteur, tel_tuteur):
     try:
         with engine.begin() as conn:
             # 1. Insertion dans "utilisateur" avec sexe et adresse
@@ -90,6 +92,40 @@ def ajouter_eleve(nom, prenom, sexe, email, adresse, mot_de_passe, classe_id, nu
         print(f"Erreur ajout élève : {e}")
         return False
 
+def generer_numero_eleve():
+    # On récupère l'année actuelle (ex: 2024 ou 2026)
+    annee_actuelle = datetime.now().year
+    prefixe = f"EL-{annee_actuelle}-"
+
+    try:
+        with engine.connect() as conn:
+            # On cherche le plus grand numéro qui commence par "EL-Annee-"
+            query = text("""
+                SELECT numero_eleve 
+                FROM eleve_classe 
+                WHERE numero_eleve LIKE :prefixe 
+                ORDER BY numero_eleve DESC 
+                LIMIT 1
+            """)
+            # fetchone() car on veut juste le premier résultat de la liste
+            resultat = conn.execute(query, {"prefixe": f"{prefixe}%"}).fetchone()
+
+            if resultat:
+                # Si on trouve "EL-2024-003", on le coupe par les tirets et on prend "003"
+                dernier_numero = resultat[0] # On récupère la chaîne de caractères
+                valeur_chiffre = int(dernier_numero.split("-")[2]) # On extrait le chiffre et on le convertit en entier
+                nouveau_numero = valeur_chiffre + 1
+            else:
+                # Si c'est le tout premier élève de l'année, on commence à 1
+                nouveau_numero = 1
+
+            # On formate le texte pour forcer les 3 zéros (ex: 001, 012, 105)
+            return f"{prefixe}{nouveau_numero:03d}"
+            
+    except Exception as e:
+        print(f"Erreur génération matricule : {e}")
+        # Sécurité : en cas d'erreur serveur, on renvoie quand même un code provisoire pour ne pas bloquer l'ajout
+        return f"{prefixe}ERR-{random.randint(100,999)}"
 # N'oublie pas de modifier aussi get_tous_les_eleves pour afficher le sexe et l'adresse
 def get_tous_les_eleves():
     try:
@@ -112,7 +148,7 @@ def supprimer_ele(id_eleve):
     try:
         with engine.connect() as conn:
             # On cherche l'élève par son ID et on le supprime
-            query = text("DELETE FROM eleves WHERE id = :id")
+            query = text("DELETE FROM utilisateur WHERE id = :id AND role = 'eleve'")
             conn.execute(query, {"id": id_eleve})
             conn.commit() # On valide la suppression dans Aiven
             return True
@@ -123,43 +159,107 @@ def supprimer_ele(id_eleve):
 def get_eleve_by_id(id_eleve):
     try:
         with engine.connect() as conn:
-            query = text("SELECT * FROM eleves WHERE id = :id")
-            resultat = conn.execute(query, {"id": id_eleve}).mappings().fetchone()
-            return resultat
+            # On récupère les infos des DEUX tables pour remplir le formulaire
+            query = text("""
+                SELECT u.id, u.nom, u.prenom, u.sexe, u.email, u.adresse, u.mot_de_passe,
+                       ec.numero_eleve, ec.date_naissance, ec.nom_tuteur, ec.tel_tuteur, ec.classe_id
+                FROM utilisateur u
+                JOIN eleve_classe ec ON u.id = ec.eleve_id
+                WHERE u.id = :id AND u.role = 'eleve'
+            """)
+            return conn.execute(query, {"id": id_eleve}).mappings().fetchone()
     except Exception as e:
-        print(f"Erreur lors de la récupération de l'élève : {e}")
+        print(f"Erreur get_eleve : {e}")
         return None
 # fonction pour récupérer les notes d'un élève par son ID, elle sera utilisée dans le dashboard admin pour afficher les notes d'un élève spécifique
 def get_notes_by_eleve(id_eleve):
     try:
         with engine.connect() as conn:
-            # On récupère les notes de cet élève spécifique
-            query = text("SELECT * FROM notes WHERE eleve_id = :id_eleve ORDER BY date_saisie DESC")
+            # On suit le chemin exact : Note -> Classe_Matiere -> Matiere
+            query = text("""
+                SELECT 
+                    n.id, 
+                    n.valeur, 
+                    n.type_evaluation, 
+                    n.date_saisie, 
+                    m.nom AS matiere
+                FROM note n
+                JOIN classe_matiere cm ON n.classe_matiere_id = cm.id
+                JOIN matiere m ON cm.matiere_id = m.id
+                WHERE n.eleve_id = :id_eleve
+                ORDER BY n.date_saisie DESC
+            """)
             resultats = conn.execute(query, {"id_eleve": id_eleve}).mappings().fetchall()
             return resultats
     except Exception as e:
         print(f"Erreur lors de la récupération des notes : {e}")
         return []
-# fonction pour modifier les informations d'un élève dans la base de données, elle sera utilisée dans le dashboard admin pour modifier les informations d'un élève
-def modifier_eleve_db(id_eleve, nom, prenom, date_naissance, sexe, adresse, classe, filiere, email, password, nom_tuteur, tel_tuteur):
+def get_note_by_id(id_note):
     try:
         with engine.connect() as conn:
+            # On récupère la note et le nom de la matière associée
             query = text("""
-                UPDATE eleves SET 
-                nom=:nom, prenom=:prenom, date_naissance=:date_naissance, sexe=:sexe, 
-                adresse=:adresse, classe=:classe, filiere=:filiere, email=:email, mot_de_passe=:password, 
-                nom_tuteur=:nom_tuteur, tel_tuteur=:tel_tuteur
+                SELECT n.*, m.nom as nom_matiere, u.nom as nom_eleve, u.prenom as prenom_eleve
+                FROM note n
+                JOIN utilisateur u ON n.eleve_id = u.id
+                JOIN classe_matiere cm ON n.classe_matiere_id = cm.id
+                JOIN matiere m ON cm.matiere_id = m.id
+                WHERE n.id = :id
+            """)
+            return conn.execute(query, {"id": id_note}).mappings().fetchone()
+    except Exception as e:
+        print(f"Erreur get_note : {e}")
+        return None
+
+def modifier_note_db(id_note, nouvelle_valeur, type_eval, semestre):
+    try:
+        with engine.begin() as conn:
+            query = text("""
+                UPDATE note 
+                SET valeur = :valeur, type_evaluation = :type, semestre = :semestre 
                 WHERE id = :id
             """)
             conn.execute(query, {
-                "id": id_eleve, "nom": nom, "prenom": prenom, "date_naissance": date_naissance,
-                "sexe": sexe, "adresse": adresse, "classe": classe, "filiere": filiere, "email": email,
-                "password": password, "nom_tuteur": nom_tuteur, "tel_tuteur": tel_tuteur
+                "valeur": nouvelle_valeur,
+                "type": type_eval,
+                "semestre": semestre,
+                "id": id_note
             })
-            conn.commit()
             return True
     except Exception as e:
-        print(f"Erreur lors de la modification : {e}")
+        print(f"Erreur modification note : {e}")
+        return False
+# fonction pour modifier les informations d'un élève dans la base de données, elle sera utilisée dans le dashboard admin pour modifier les informations d'un élève
+def modifier_eleve_db(id_eleve, nom, prenom, sexe, adresse, email, mot_de_passe, classe_id, date_naissance, nom_tuteur, tel_tuteur):
+    try:
+        # On utilise engine.begin() car on modifie DEUX tables (Transaction)
+        with engine.begin() as conn:
+            
+            # 1. Mise à jour des informations générales dans "utilisateur"
+            query_user = text("""
+                UPDATE utilisateur 
+                SET nom=:nom, prenom=:prenom, sexe=:sexe, adresse=:adresse, email=:email, mot_de_passe=:mot_de_passe
+                WHERE id = :id
+            """)
+            conn.execute(query_user, {
+                "nom": nom, "prenom": prenom, "sexe": sexe, "adresse": adresse, 
+                "email": email, "mot_de_passe": mot_de_passe, "id": id_eleve
+            })
+
+            # 2. Mise à jour des informations scolaires dans "eleve_classe"
+            query_eleve = text("""
+                UPDATE eleve_classe 
+                SET classe_id=:classe_id, date_naissance=:date_naissance, nom_tuteur=:nom_tuteur, tel_tuteur=:tel_tuteur
+                WHERE eleve_id = :id
+            """)
+            conn.execute(query_eleve, {
+                "classe_id": classe_id, "date_naissance": date_naissance, 
+                "nom_tuteur": nom_tuteur, "tel_tuteur": tel_tuteur, "id": id_eleve
+            })
+            return True
+            
+    except Exception as e:
+        print(f"Erreur modification élève : {e}")
         return False
 #------------------------les fonctions de gestion des profs------------------------
 # fonction pour ajouter un professeur à la base de données, elle sera utilisée dans le dashboard admin pour créer des comptes professeurs

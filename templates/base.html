@@ -12,29 +12,16 @@
 </head>
 <body class="bg-light">
 
+    <body>
+    {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-mortarboard-fill me-2"></i>Gestion Scolarité
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="#"><i class="bi bi-person-circle"></i> Mon Profil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light ms-3 btn-sm mt-1" href="/">Déconnexion</a>
-                    </li>
-                </ul>
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="fas fa-graduation-cap"></i> Gestion Scolarité</a>
             </div>
-        </div>
     </nav>
+    {% endblock %}
 
+    
     <div class="container py-4">
         {% block content %}
         {% endblock %}

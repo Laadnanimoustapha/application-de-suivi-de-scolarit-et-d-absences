@@ -16,7 +16,7 @@
                     <tr>
                         <th>Matière</th>
                         <th>Note (/20)</th>
-                        <th>Remarque</th>
+                        <th>Type d'évaluation</th>
                         <th>Date de saisie</th>
                         <th>Actions</th>
                     </tr>
@@ -32,10 +32,12 @@
                                     {{ note.valeur }}
                                 </span>
                             </td>
-                            <td class="text-muted">{{ note.remarque or '-' }}</td>
+                            <td class="text-muted">{{ note.type_evaluation }}</td>
                             <td>{{ note.date_saisie.strftime('%d/%m/%Y') }}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Modifier</button>
+                                <a href="{{ url_for('route_modifier_note', id=note.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Modifier
+                                </a>                            
                             </td>
                         </tr>
                         {% endfor %}
