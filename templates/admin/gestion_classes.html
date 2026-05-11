@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="fw-bold text-primary mb-4"><i class="bi bi-door-open"></i> Gestion des Classes</h3>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <h5 class="fw-bold mb-3">Nouvelle Classe</h5>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Nom de la classe</label>
+                        <input type="text" name="nom" class="form-control" placeholder="ex: 2 Bac PC 1" required>
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Niveau</label>
+                    <select name="niveau" class="form-select" required>
+                        <option value="" disabled selected>Choisir...</option>
+                        <option value="Tronc Commun">Tronc Commun</option>
+                        <option value="1er Bac">1er Bac</option>
+                        <option value="2ème Bac">2ème Bac</option>
+                    </select>
+                </div>
+                    <div class="mb-3">
+                        <label class="form-label">Filière</label>
+                        <select name="filiere" class="form-select" required>
+                            <option value="" disabled selected>Choisir...</option>
+                            <option value="Littéraire">Littéraire</option>
+                            <option value="Physique-Chimie (PC)">Physique-Chimie (PC)</option>
+                            <option value="SVT">Sciences de la Vie et de la Terre (SVT)</option>
+                            <option value="SM-A">Sciences Mathématiques A (SM-A)</option>
+                            <option value="SM-B">Sciences Mathématiques B (SM-B)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Année Académique</label>
+                    <input type="text" name="annee_academique" class="form-control" value="2025-2026" required>
+                </div>
+                    <button type="submit" class="btn btn-primary w-100">Enregistrer la classe</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                            <th>Nom</th>
+                            <th>Niveau</th>
+                            <th>Filière</th>
+                            <th>Année</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for classe in classes %}
+                        <tr>
+                            <td class="fw-bold">{{ classe.nom }}</td>
+                            <td>{{ classe.niveau }}</td>
+                            <td><span class="badge bg-secondary">{{ classe.filiere }}</span></td>
+                            <td><span class="badge bg-light text-dark border">{{ classe.annee_academique }}</span></td>
+                            <td>
+                                <a href="{{ url_for('eleves_par_classe', id=classe.id) }}" class="btn btn-sm btn-outline-info" title="Voir les élèves">
+                                    <i class="bi bi-people"></i>
+                                </a>
+                                
+                                <form action="{{ url_for('supprimer_classe', id=classe.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Es-tu sûr de vouloir supprimer cette classe ?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

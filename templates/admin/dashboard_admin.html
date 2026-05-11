@@ -47,7 +47,15 @@
                 <a href="{{ url_for('gestion_profs') }}" class="btn btn-success px-4 py-2">
                     <i class="bi bi-person-workspace me-2"></i> Gestion des Profs
                 </a>
-                
+                <a href="{{ url_for('gestion_classes') }}" class="btn btn-info px-4 py-2">
+                    <i class="bi bi-door-open me-2"></i> Gestion des Classes
+                </a>
+                <a href="{{ url_for('gestion_assignations') }}" class="btn btn-info px-4 py-2">
+                    <i class="bi bi-diagram-3 me-2"></i> Assignations (Prof ↔ Matière ↔ Classe)
+                </a>
+                <a href="{{ url_for('affectation_eleves') }}" class="btn btn-info px-4 py-2">
+                    <i class="bi bi-diagram-3 me-2"></i> Affectation des Élèves (Élève ↔ Classe)
+                </a>
                 <a href="{{ url_for('gestion_absences') }}" class="btn btn-warning text-dark px-4 py-2">
                     <i class="bi bi-calendar-check-fill me-2"></i> Gestion des Absences
                 </a>

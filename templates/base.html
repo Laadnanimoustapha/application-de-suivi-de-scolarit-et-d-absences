@@ -16,8 +16,13 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fas fa-graduation-cap"></i> Gestion Scolarité</a>
+            <a class="navbar-brand" href="{{ url_for('admin_dash') }}"><i class="fas fa-graduation-cap"></i> Gestion Scolarité</a>
             </div>
+        <div class="d-flex align-items-center ms-auto">
+    <a href="{{ url_for('logout') }}" class="btn btn-link text-white text-decoration-none btn-sm fw-bold">
+        <i class="bi bi-box-arrow-right"></i> Déconnexion
+    </a>
+</div>
     </nav>
     {% endblock %}
 
