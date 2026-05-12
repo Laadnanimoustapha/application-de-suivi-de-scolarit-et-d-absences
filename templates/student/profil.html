@@ -1,78 +1,66 @@
-{% extends 'base.html' %}
+{% extends 'student/base_student.html' %}
+
+{% block page_title %}Mon Profil{% endblock %}
 
 {% block content %}
-<div class="row">
-    <!-- Sidebar -->
-    <div class="col-md-3 mb-4">
-        {% include 'student/_sidebar.html' %}
+<header class="page-header">
+    <h1>Mon Profil</h1>
+    <p>Informations personnelles et coordonnees</p>
+</header>
+
+<div class="row g-3">
+    <!-- Personal Info -->
+    <div class="col-md-6">
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="bi bi-person me-2" aria-hidden="true"></i> Informations Personnelles
+            </div>
+            <div class="info-row">
+                <span class="label">Nom complet</span>
+                <span class="value">{{ eleve.nom }} {{ eleve.prenom }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Matricule</span>
+                <span class="value" style="font-variant-numeric: tabular-nums;">{{ eleve.numero_eleve }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Date de naissance</span>
+                <span class="value">{{ eleve.date_naissance.strftime('%d/%m/%Y') if eleve.date_naissance else 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Sexe</span>
+                <span class="value">{{ eleve.sexe }}</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="col-md-9">
-        <h2 class="h4 fw-bold mb-4">Mon Profil</h2>
-
-        <div class="row g-4">
-            <!-- Informations Personnelles -->
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white border-bottom py-3">
-                        <h6 class="mb-0 fw-bold"><i class="bi bi-person-vcard text-primary me-2"></i> Informations Personnelles</h6>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted">Nom complet</span>
-                                <span class="fw-bold">{{ eleve.nom }} {{ eleve.prenom }}</span>
-                            </li>
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted">Matricule</span>
-                                <span class="fw-bold font-monospace">{{ eleve.numero_eleve }}</span>
-                            </li>
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted">Date de Naissance</span>
-                                <span class="fw-bold">{{ eleve.date_naissance.strftime('%d/%m/%Y') if eleve.date_naissance else 'N/A' }}</span>
-                            </li>
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted">Sexe</span>
-                                <span class="fw-bold">{{ eleve.sexe }}</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+    <!-- Contact & Guardian -->
+    <div class="col-md-6">
+        <div class="info-card" style="margin-bottom: 12px;">
+            <div class="info-card-header">
+                <i class="bi bi-envelope me-2" aria-hidden="true"></i> Contact
             </div>
+            <div class="info-row">
+                <span class="label">Email</span>
+                <span class="value">{{ eleve.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Adresse</span>
+                <span class="value">{{ eleve.adresse if eleve.adresse else 'Non renseignee' }}</span>
+            </div>
+        </div>
 
-            <!-- Contact & Tuteur -->
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white border-bottom py-3">
-                        <h6 class="mb-0 fw-bold"><i class="bi bi-telephone text-primary me-2"></i> Contact & Tuteur</h6>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted">Email</span>
-                                <span class="fw-bold">{{ eleve.email }}</span>
-                            </li>
-                            <li class="list-group-item px-0 d-flex flex-column align-items-start">
-                                <span class="text-muted mb-1">Adresse Principale</span>
-                                <span class="fw-bold">{{ eleve.adresse if eleve.adresse else 'Non renseignée' }}</span>
-                            </li>
-                            <li class="list-group-item px-0 mt-2 border-top-0 pt-3">
-                                <div class="bg-light p-3 rounded">
-                                    <h6 class="fw-bold mb-2 text-dark small text-uppercase">Informations du Tuteur Légal</h6>
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="text-muted small">Nom</span>
-                                        <span class="fw-bold small">{{ eleve.nom_tuteur if eleve.nom_tuteur else 'N/A' }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted small">Téléphone</span>
-                                        <span class="fw-bold small">{{ eleve.tel_tuteur if eleve.tel_tuteur else 'N/A' }}</span>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="bi bi-people me-2" aria-hidden="true"></i> Tuteur Legal
+            </div>
+            <div class="info-row">
+                <span class="label">Nom</span>
+                <span class="value">{{ eleve.nom_tuteur if eleve.nom_tuteur else 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Telephone</span>
+                <span class="value">{{ eleve.tel_tuteur if eleve.tel_tuteur else 'N/A' }}</span>
             </div>
         </div>
     </div>
