@@ -4,11 +4,12 @@ from python.database import (check_etudiant, check_professeur, check_admin, ajou
                                get_tous_les_profs, supprimer_pr,supprimer_pr, get_prof_by_id,get_notes_by_eleve,
                                get_note_by_id,modifier_note_db, modifier_prof_db,compter_eleves, get_nombre_eleves_classe,
                                ajouter_classe_db,supprimer_classe_db,compter_profs,get_toutes_les_matieres,get_eleves_by_classe,
-                                 get_classe_by_id, get_toutes_les_classes,ajouter_assignation_db,get_toutes_les_assignations,get_dernier_coefficient)
+                                 get_classe_by_id,get_absences_non_justifiees,justifier_absence_db, update_configuration,get_configuration_actuelle,get_toutes_les_classes,ajouter_assignation_db,get_toutes_les_assignations,get_profs_par_classe,get_dernier_coefficient)
 import os
 from dotenv import load_dotenv
 from flask import jsonify
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 app = Flask(__name__)
@@ -133,24 +134,31 @@ def supprimer_eleve(id):
 @admin_required
 def route_modifier_eleve(id):
     if request.method == "POST":
-        # On récupère tous les champs du formulaire de modification
         nom = request.form.get("nom")
         prenom = request.form.get("prenom")
+        date_naissance = request.form.get("date_naissance")
         sexe = request.form.get("sexe")
         adresse = request.form.get("adresse")
         email = request.form.get("email")
-        mot_de_passe = request.form.get("mot_de_passe")
-        
-        classe_id = request.form.get("classe_id")
-        date_naissance = request.form.get("date_naissance")
         nom_tuteur = request.form.get("nom_tuteur")
         tel_tuteur = request.form.get("tel_tuteur")
         
-        # On appelle notre nouvelle fonction à deux têtes !
-        modifier_eleve_db(id, nom, prenom, sexe, adresse, email, mot_de_passe, classe_id, date_naissance, nom_tuteur, tel_tuteur)
+        # 1. On récupère le mot de passe tapé
+        nouveau_mdp = request.form.get("mot_de_passe")
         
-        return redirect(url_for("gestion_eleves"))
-    
+        # 2. On vérifie s'il est vide
+        if nouveau_mdp and nouveau_mdp.strip() != "":
+            # Si l'admin a tapé un truc, on le hache (sécurité)
+            mdp_hash = generate_password_hash(nouveau_mdp)
+        else:
+            # S'il est vide, on le met à None pour dire "Ne pas modifier"
+            mdp_hash = None
+            
+        # 3. On appelle la fonction de mise à jour
+        modifier_eleve_db(id, nom, prenom, date_naissance, sexe, adresse, email, nom_tuteur, tel_tuteur, mdp_hash)
+        
+        flash("✅ Les informations de l'élève ont été mises à jour.", "success")
+        return redirect(url_for("gestion_eleves")) # Ou la page où tu veux rediriger
     # Si c'est un GET, on va chercher les infos pour remplir les cases
     eleve = get_eleve_by_id(id)
     return render_template("admin/modifier_eleve.html", eleve=eleve)
@@ -261,18 +269,21 @@ def gestion_classes():
 
     classes = get_toutes_les_classes()
     return render_template("admin/gestion_classes.html", classes=classes)
-@app.route("/admin/classes/<int:id>/eleves")
+@app.route("/admin/classes/<int:id>/details") # On peut renommer la route en /details
 @admin_required
-def eleves_par_classe(id):
-    # On récupère les infos de la classe (pour le titre de la page)
+def details_classe(id):
     classe = get_classe_by_id(id)
     if not classe:
-        return redirect(url_for('gestion_classes')) # Redirection si la classe n'existe pas
+        return redirect(url_for('gestion_classes'))
     
-    # On récupère les élèves de cette classe
+    # On récupère les deux listes
     eleves = get_eleves_by_classe(id)
+    professeurs = get_profs_par_classe(id)
     
-    return render_template("admin/eleves_classe.html", classe=classe, eleves=eleves)
+    return render_template("admin/eleves_classe.html", 
+                           classe=classe, 
+                           eleves=eleves, 
+                           profs=professeurs)
 @app.route("/admin/classes/supprimer/<int:id>", methods=["POST"])
 @admin_required
 def supprimer_classe(id):
@@ -338,10 +349,46 @@ def affectation_eleves():
 def api_get_coefficient(filiere, matiere_id):
     coef = get_dernier_coefficient(filiere, matiere_id)
     return jsonify({"coefficient": coef})
-@app.route("/admin/absences")
+@app.route("/admin/absences", methods=["GET"])
 @admin_required
 def gestion_absences():
-    return render_template("admin/gestion_absences.html")
+    # On récupère la liste des absences non justifiées
+    absences = get_absences_non_justifiees()
+    return render_template("admin/gestion_absences.html", absences=absences)
+
+@app.route("/admin/absences/justifier", methods=["POST"])
+@admin_required
+def justifier_absence():
+    absence_id = request.form.get("absence_id")
+    motif = request.form.get("motif")
+    
+    if absence_id and motif:
+        success = justifier_absence_db(absence_id, motif)
+        if success:
+            flash("✅ L'absence a été justifiée avec succès.", "success")
+        else:
+            flash("❌ Erreur lors de la mise à jour de l'absence.", "danger")
+            
+    return redirect(url_for("gestion_absences"))
+
+@app.route("/admin/configuration", methods=["GET", "POST"])
+@admin_required
+def gestion_configuration():
+    if request.method == "POST":
+        nouvelle_annee = request.form.get("annee_academique")
+        nouveau_semestre = request.form.get("semestre")
+        
+        if nouvelle_annee and nouveau_semestre:
+            success = update_configuration(nouvelle_annee, nouveau_semestre)
+            if success:
+                flash("✅ Configuration mise à jour ! Le système est synchronisé.", "success")
+            else:
+                flash("❌ Erreur lors de la mise à jour.", "danger")
+                
+        return redirect(url_for("gestion_configuration"))
+
+    config = get_configuration_actuelle()
+    return render_template("admin/configuration.html", config=config)
 # -----------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
 
