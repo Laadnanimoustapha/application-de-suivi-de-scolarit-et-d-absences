@@ -13,7 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 app = Flask(__name__)
-#app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.urandom(24)
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
