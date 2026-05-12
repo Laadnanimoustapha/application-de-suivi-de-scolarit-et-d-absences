@@ -16,13 +16,38 @@ if DATABASE_KEY.startswith("mysql://"):
 
 engine = create_engine(DATABASE_KEY, pool_pre_ping=True, pool_recycle=300)
 
-def check_etudiant(email,password): # check if the student has an account 
+#---------------------------------------------------------------------------------
+# ------------ LES METHODES DE L'ESPACE ETUDIANT (STUDENTS PART) ------------
+#---------------------------------------------------------------------------------
+def check_etudiant(email, password): 
+    """Vérifie si l'élève existe et retourne son ID"""
     with engine.connect() as conn:
-        query = text("SELECT * FROM etudiant WHERE email = :email AND password = :password")
-        result = conn.execute(query,{"email" : email,"password" : password}).fetchone()
+        # On interroge la table utilisateur (role='eleve') et non pas 'etudiant'
+        query = text("SELECT id FROM utilisateur WHERE email = :email AND mot_de_passe = :password AND role = 'eleve'")
+        result = conn.execute(query, {"email": email, "password": password}).fetchone()
+        
+        if result:
+            return result.id # On retourne l'ID pour la session
+        return None
 
-        return result is not None 
-
+def get_absences_by_eleve(eleve_id):
+    """Récupère toutes les absences d'un élève spécifique"""
+    try:
+        with engine.connect() as conn:
+            query = text("""
+                SELECT a.id, c.nom AS classe_nom, m.nom AS matiere_nom, a.date_absence, a.justifiee, a.motif_justification 
+                FROM absence a
+                JOIN classe_matiere cm ON a.classe_matiere_id = cm.id
+                JOIN classe c ON cm.classe_id = c.id
+                JOIN matiere m ON cm.matiere_id = m.id
+                WHERE a.eleve_id = :eleve_id
+                ORDER BY a.date_absence DESC
+            """)
+            return conn.execute(query, {"eleve_id": eleve_id}).mappings().fetchall()
+    except Exception as e:
+        print(f"Erreur SQL lecture absences eleve : {e}")
+        return []
+#---------------------------------------------------------------------------------
 
 def check_professeur(email,password): # check if the profesor has an account 
     with engine.connect() as conn:

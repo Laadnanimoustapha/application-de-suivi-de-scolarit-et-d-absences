@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+        {% include 'student/_sidebar.html' %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+        <h2 class="h4 fw-bold mb-4">Historique des Absences</h2>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Date</th>
+                                <th>Matière</th>
+                                <th>Statut</th>
+                                <th class="pe-4">Motif (si justifié)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if absences %}
+                                {% for abs in absences %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ abs.date_absence.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ abs.matiere_nom }}</td>
+                                    <td>
+                                        {% if abs.justifiee %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle me-1"></i> Justifiée</span>
+                                        {% else %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger"><i class="bi bi-exclamation-circle me-1"></i> Non Justifiée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-4 text-muted">
+                                        {% if abs.justifiee and abs.motif_justification %}
+                                            {{ abs.motif_justification }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-calendar-check fs-1 d-block mb-3 text-success"></i>
+                                        Aucune absence n'a été enregistrée à votre nom.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

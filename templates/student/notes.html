@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+        {% include 'student/_sidebar.html' %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 fw-bold mb-0">Relevé de Notes</h2>
+            <button type="button" class="btn btn-outline-primary" disabled title="Fonctionnalité PDF en cours de développement">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger PDF
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Matière</th>
+                                <th>Type d'Évaluation</th>
+                                <th>Date de Saisie</th>
+                                <th class="text-end pe-4">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if notes %}
+                                {% for note in notes %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ note.matiere_nom }}</td>
+                                    <td>
+                                        {% if note.type_evaluation == 'Devoir' %}
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info">Devoir</span>
+                                        {% elif note.type_evaluation == 'Examen' %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Examen</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary">{{ note.type_evaluation }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted">{{ note.date_saisie.strftime('%d/%m/%Y') if note.date_saisie else 'N/A' }}</td>
+                                    <td class="text-end pe-4 font-monospace fw-bold fs-5">{{ note.valeur }}/20</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                        Aucune note n'a encore été saisie.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
