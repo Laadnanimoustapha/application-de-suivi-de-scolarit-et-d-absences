@@ -18,10 +18,13 @@ engine = create_engine(DATABASE_KEY, pool_pre_ping=True, pool_recycle=300)
 
 def check_etudiant(email,password): # check if the student has an account 
     with engine.connect() as conn:
-        query = text("SELECT * FROM etudiant WHERE email = :email AND password = :password")
+        # Students are stored in the utilisateur table with role = 'eleve'
+        query = text("SELECT id FROM utilisateur WHERE email = :email AND mot_de_passe = :password AND role = 'eleve'")
         result = conn.execute(query,{"email" : email,"password" : password}).fetchone()
 
-        return result is not None 
+        if result:
+            return result[0] # Return the ID
+        return None
 
 
 def check_professeur(email,password): # check if the profesor has an account 
@@ -611,3 +614,23 @@ def justifier_absence_db(absence_id, motif):
     except Exception as e:
         print(f"Erreur SQL justification absence : {e}")
         return False
+
+#---------------------------------------------------------------------------------
+# ------------ LES METHODES DE L'ESPACE ELEVE ------------
+# ---------------------------------------------------------------------------------
+def get_absences_by_eleve(eleve_id):
+    """Récupère toutes les absences d'un élève spécifique"""
+    try:
+        with engine.connect() as conn:
+            query = text("""
+                SELECT a.id, m.nom AS matiere_nom, a.date_absence, a.justifiee, a.motif_justification
+                FROM absence a
+                JOIN classe_matiere cm ON a.classe_matiere_id = cm.id
+                JOIN matiere m ON cm.matiere_id = m.id
+                WHERE a.eleve_id = :eleve_id
+                ORDER BY a.date_absence DESC
+            """)
+            return conn.execute(query, {"eleve_id": eleve_id}).mappings().fetchall()
+    except Exception as e:
+        print(f"Erreur SQL lecture absences élève : {e}")
+        return []
