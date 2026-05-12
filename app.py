@@ -18,6 +18,15 @@ def admin_required(f):
             return redirect(url_for('main_function'))
         return f(*args, **kwargs)
     return decorated_function
+
+def student_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session or session.get('role') != 'eleve':
+            return redirect(url_for('main_function'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route("/")
 def main_function():
     # On peut passer une variable "error" vide au départ
@@ -29,8 +38,11 @@ def login_etudiant():
     email = request.form.get("email")
     password = request.form.get("password")
     
-    if check_etudiant(email, password):
-        # Si c'est bon, on le redirige vers sa page
+    eleve_id = check_etudiant(email, password)
+    if eleve_id:
+        # Si c'est bon, on sauvegarde l'ID et le rôle dans la session
+        session['user_id'] = eleve_id
+        session['role'] = 'eleve'
         return redirect(url_for("eleve_dash"))
     else:
         # Si c'est faux, on recharge la page login avec un message d'erreur
@@ -76,9 +88,6 @@ def logout():
 def prof_dash():
     return render_template("dashboard_prof.html")
 
-@app.route("/eleve/dashboard")
-def eleve_dash():
-    return render_template("dashboard_eleve.html")
 # ---------------------------------------------------------------------------------
 # ------------ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
 # ---------------------------------------------------------------------------------
@@ -338,6 +347,7 @@ def affectation_eleves():
     
     return render_template("admin/affectation_eleves.html", classes=classes, eleves=eleves_dispos)
 
+
 # --- ROUTE API (Pour le Smart Defaulting) ---
 @app.route("/api/coefficient/<filiere>/<int:matiere_id>")
 @admin_required
@@ -386,6 +396,53 @@ def gestion_configuration():
     return render_template("admin/configuration.html", config=config)
 # -----------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------------
+#------------------------------------STUDENTS PART-----------------------------------
+#------------------------------------------------------------------------------------
+
+@app.route("/eleve/dashboard")
+@student_required
+def eleve_dash():
+    eleve_id = session.get('user_id')
+    eleve = get_eleve_by_id(eleve_id)
+    notes = get_notes_by_eleve(eleve_id)
+    absences = get_absences_by_eleve(eleve_id)
+    
+    recent_notes = notes[:5]
+    recent_absences = absences[:5]
+    total_absences = sum(1 for a in absences if not a.justifiee)
+    
+    total_points = sum(note.valeur for note in notes)
+    moyenne = round(total_points / len(notes), 2) if notes else "N/A"
+
+    return render_template("student/dashboard_eleve.html", eleve=eleve, notes=recent_notes, absences=recent_absences, total_absences=total_absences, moyenne=moyenne)
+
+@app.route("/eleve/notes")
+@student_required
+def eleve_notes():
+    eleve_id = session.get('user_id')
+    notes = get_notes_by_eleve(eleve_id)
+    return render_template("student/notes.html", notes=notes)
+
+@app.route("/eleve/absences")
+@student_required
+def eleve_absences():
+    eleve_id = session.get('user_id')
+    absences = get_absences_by_eleve(eleve_id)
+    return render_template("student/absences.html", absences=absences)
+
+@app.route("/eleve/profil")
+@student_required
+def eleve_profil():
+    eleve_id = session.get('user_id')
+    eleve = get_eleve_by_id(eleve_id)
+    return render_template("student/profil.html", eleve=eleve)
+
+#------------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
