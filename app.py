@@ -1,10 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, session, flash
-from python.database import (check_etudiant, check_professeur, check_admin, ajouter_eleve, get_eleves_sans_classe,affecter_eleve_db,get_tous_les_eleves,
-                             generer_numero_eleve,supprimer_ele,get_eleve_by_id, modifier_eleve_db, ajouter_prof,
-                               get_tous_les_profs, supprimer_pr,supprimer_pr, get_prof_by_id,get_notes_by_eleve,
-                               get_note_by_id,modifier_note_db, modifier_prof_db,compter_eleves, get_nombre_eleves_classe,
-                               ajouter_classe_db,supprimer_classe_db,compter_profs,get_toutes_les_matieres,get_eleves_by_classe,
-                                 get_classe_by_id,get_absences_non_justifiees,justifier_absence_db, update_configuration,get_configuration_actuelle,get_toutes_les_classes,ajouter_assignation_db,get_toutes_les_assignations,get_profs_par_classe,get_dernier_coefficient)
+from python.database import *
 import os
 from dotenv import load_dotenv
 from flask import jsonify
