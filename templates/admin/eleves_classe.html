@@ -4,42 +4,76 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold text-primary">
-            <i class="bi bi-mortarboard"></i> Élèves de la classe : {{ classe.nom }}
-            <span class="badge bg-secondary ms-2 fs-6">{{ classe.filiere }}</span>
+            <i class="bi bi-door-open-fill"></i> {{ classe.nom }} 
+            <small class="text-muted fs-6">({{ classe.filiere }} - {{ classe.annee_academique }})</small>
         </h3>
-        <a href="{{ url_for('gestion_classes') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Retour aux classes
+        <a href="{{ url_for('gestion_classes') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Retour
         </a>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Sexe</th>
-                        <th>Email</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for eleve in eleves %}
-                    <tr>
-                        <td class="fw-bold">{{ eleve.nom }}</td>
-                        <td>{{ eleve.prenom }}</td>
-                        <td>{{ eleve.sexe }}</td>
-                        <td>{{ eleve.email }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-4">
-                            Aucun élève n'est encore affecté à cette classe.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-md-12 mb-5">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-badge text-success"></i> Équipe Pédagogique</h5>
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Matière</th>
+                                <th>Enseignant</th>
+                                <th>Coefficient</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prof in profs %}
+                            <tr>
+                                <td class="fw-bold">{{ prof.matiere_nom }}</td>
+                                <td>Mr/Mme {{ prof.nom }} {{ prof.prenom }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ prof.coefficient }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">Aucun professeur assigné pour le moment.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between">
+                <h5 class="fw-bold mb-3"><i class="bi bi-people text-primary"></i> Liste des Élèves</h5>
+                <span class="badge bg-primary h-50">{{ eleves|length }} / 10 élèves</span>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Nom & Prénom</th>
+                                <th>Email</th>
+                                <th>Sexe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for eleve in eleves %}
+                            <tr>
+                                <td class="fw-bold">{{ eleve.nom }} {{ eleve.prenom }}</td>
+                                <td>{{ eleve.email }}</td>
+                                <td>{{ eleve.sexe }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">Aucun élève dans cette classe.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

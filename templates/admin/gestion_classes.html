@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
 {% block content %}
 <div class="container mt-4">
@@ -63,7 +63,7 @@
                             <td><span class="badge bg-secondary">{{ classe.filiere }}</span></td>
                             <td><span class="badge bg-light text-dark border">{{ classe.annee_academique }}</span></td>
                             <td>
-                                <a href="{{ url_for('eleves_par_classe', id=classe.id) }}" class="btn btn-sm btn-outline-info" title="Voir les élèves">
+                                <a href="{{ url_for('details_classe', id=classe.id) }}" class="btn btn-sm btn-outline-info" title="Voir les élèves">
                                     <i class="bi bi-people"></i>
                                 </a>
                                 

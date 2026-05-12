@@ -210,25 +210,46 @@ def modifier_note_db(id_note, nouvelle_valeur, type_eval, semestre):
         print(f"Erreur modification note : {e}")
         return False
 # fonction pour modifier les informations d'un élève dans la base de données, elle sera utilisée dans le dashboard admin pour modifier les informations d'un élève
-def modifier_eleve_db(id_eleve, nom, prenom, sexe, adresse, email, mot_de_passe, date_naissance, nom_tuteur, tel_tuteur):
+def modifier_eleve_db(id, nom, prenom, date_naissance, sexe, adresse, email, nom_tuteur, tel_tuteur, mdp_hash):
+    """Met à jour l'élève. Ne modifie le mot de passe que si mdp_hash n'est pas None."""
     try:
-        # On utilise engine.begin() car on modifie DEUX tables (Transaction)
         with engine.begin() as conn:
             
-            # 1. Mise à jour des informations générales dans "utilisateur"
-            query_user = text("""
-                UPDATE utilisateur 
-                SET nom=:nom, prenom=:prenom, sexe=:sexe, adresse=:adresse, email=:email, mot_de_passe=:mot_de_passe, date_naissance=:date_naissance, nom_tuteur=:nom_tuteur, tel_tuteur=:tel_tuteur
-                WHERE id = :id
-            """)
-            conn.execute(query_user, {
-                "nom": nom, "prenom": prenom, "sexe": sexe, "adresse": adresse, 
-                "email": email, "mot_de_passe": mot_de_passe, "date_naissance": date_naissance, "nom_tuteur": nom_tuteur, "tel_tuteur": tel_tuteur, "id": id_eleve
-            })
-            return True
-            
+            # CAS 1 : L'admin A TAPÉ un nouveau mot de passe
+            if mdp_hash is not None:
+                query = text("""
+                    UPDATE utilisateur 
+                    SET nom = :nom, prenom = :prenom, date_naissance = :dn, 
+                        sexe = :sexe, adresse = :adresse, email = :email, 
+                        nom_tuteur = :nt, tel_tuteur = :tt, 
+                        mot_de_passe = :mdp  -- ON MET À JOUR LE MOT DE PASSE ICI
+                    WHERE id = :id
+                """)
+                conn.execute(query, {
+                    "nom": nom, "prenom": prenom, "dn": date_naissance, "sexe": sexe, 
+                    "adresse": adresse, "email": email, "nt": nom_tuteur, 
+                    "tt": tel_tuteur, "mdp": mdp_hash, "id": id
+                })
+                
+            # CAS 2 : L'admin N'A RIEN TAPÉ (mdp_hash est None)
+            else:
+                query = text("""
+                    UPDATE utilisateur 
+                    SET nom = :nom, prenom = :prenom, date_naissance = :dn, 
+                        sexe = :sexe, adresse = :adresse, email = :email, 
+                        nom_tuteur = :nt, tel_tuteur = :tt
+                    WHERE id = :id
+                    -- ON NE TOUCHE PAS À LA COLONNE mot_de_passe !
+                """)
+                conn.execute(query, {
+                    "nom": nom, "prenom": prenom, "dn": date_naissance, "sexe": sexe, 
+                    "adresse": adresse, "email": email, "nt": nom_tuteur, 
+                    "tt": tel_tuteur, "id": id
+                })
+                
+        return True
     except Exception as e:
-        print(f"Erreur modification élève : {e}")
+        print(f"Erreur lors de la mise à jour : {e}")
         return False
 #------------------------les fonctions de gestion des profs------------------------
 def get_toutes_les_matieres():
@@ -472,7 +493,22 @@ def get_prof_by_id(prof_id):
     except Exception as e:
         print(f"Erreur lors de la récupération du prof : {e}")
         return None
-
+def get_profs_par_classe(classe_id):
+    """Récupère la liste des professeurs assignés à une classe avec leurs matières"""
+    try:
+        with engine.connect() as conn:
+            query = text("""
+                SELECT u.nom, u.prenom, m.nom AS matiere_nom, cm.coefficient
+                FROM classe_matiere cm
+                JOIN utilisateur u ON cm.professeur_id = u.id
+                JOIN matiere m ON cm.matiere_id = m.id
+                WHERE cm.classe_id = :id
+                ORDER BY m.nom ASC
+            """)
+            return conn.execute(query, {"id": classe_id}).mappings().fetchall()
+    except Exception as e:
+        print(f"Erreur SQL profs par classe : {e}")
+        return []
 def modifier_prof_db(prof_id, nom, prenom, sexe, email, adresse, mot_de_passe=None, matiere_id=None, classe_id=None):
     """Sauvegarde les modifications (Infos + Matière/Classe)"""
     try:
@@ -518,4 +554,60 @@ def modifier_prof_db(prof_id, nom, prenom, sexe, email, adresse, mot_de_passe=No
     except Exception as e:
         print(f"Erreur lors de la modification : {e}")
         return False
-
+#------------------------les fonctions de gestion de la configuration globale de l'école------------------------
+def get_configuration_actuelle():
+    """Récupère l'année et le semestre en cours"""
+    try:
+        with engine.connect() as conn:
+            query = text("SELECT annee_academique, semestre FROM configuration_ecole WHERE id = 1")
+            return conn.execute(query).mappings().fetchone()
+    except Exception as e:
+        print(f"Erreur SQL configuration : {e}")
+        return None
+def update_configuration(annee, semestre):
+    """Met à jour la configuration globale de l'école"""
+    try:
+        with engine.begin() as conn:
+            query = text("""
+                UPDATE configuration_ecole 
+                SET annee_academique = :annee, semestre = :semestre 
+                WHERE id = 1
+            """)
+            conn.execute(query, {"annee": annee, "semestre": semestre})
+            return True
+    except Exception as e:
+        print(f"Erreur mise à jour configuration : {e}")
+        return False
+def get_absences_non_justifiees():
+    """Récupère toutes les absences qui attendent une justification"""
+    try:
+        with engine.connect() as conn:
+            # On fait des jointures pour avoir le nom de l'élève, de la classe et de la matière
+            query = text("""
+                SELECT a.id, u.nom, u.prenom, c.nom AS classe_nom, m.nom AS matiere_nom, a.date_absence 
+                FROM absence a
+                JOIN utilisateur u ON a.eleve_id = u.id
+                JOIN classe_matiere cm ON a.classe_matiere_id = cm.id
+                JOIN classe c ON cm.classe_id = c.id
+                JOIN matiere m ON cm.matiere_id = m.id
+                WHERE a.justifiee = FALSE
+                ORDER BY a.date_absence DESC
+            """)
+            return conn.execute(query).mappings().fetchall()
+    except Exception as e:
+        print(f"Erreur SQL lecture absences : {e}")
+        return []
+def justifier_absence_db(absence_id, motif):
+    """Met à jour l'absence pour la marquer comme justifiée avec son motif"""
+    try:
+        with engine.begin() as conn:
+            query = text("""
+                UPDATE absence 
+                SET justifiee = TRUE, motif_justification = :motif 
+                WHERE id = :id
+            """)
+            conn.execute(query, {"id": absence_id, "motif": motif})
+            return True
+    except Exception as e:
+        print(f"Erreur SQL justification absence : {e}")
+        return False

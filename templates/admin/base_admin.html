@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Scolarité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+
+        /* --- LE MENU LATÉRAL --- */
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: all 0.3s ease; /* Animation fluide */
+        }
+
+        /* CACHER LE SCROLLBAR */
+        .admin-sidebar::-webkit-scrollbar { display: none; }
+        .admin-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* CLASSE POUR FERMER LE MENU */
+        .admin-sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .sidebar-nav { list-style: none; padding-left: 0; }
+
+        .nav-item-admin {
+            padding: 12px 20px;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            font-size: 0.95rem;
+        }
+
+        .nav-item-admin i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 25px; 
+            text-align: center;
+            color: #adb5bd;
+        }
+
+        .nav-item-admin:hover, .nav-item-admin.active {
+            background-color: #495057;
+            color: white;
+        }
+        .nav-item-admin:hover i, .nav-item-admin.active i { color: white; }
+
+        .nav-category {
+            color: #adb5bd;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 25px 20px 5px;
+            opacity: 0.7;
+        }
+        
+        /* --- LA ZONE DE CONTENU PRINCIPAL --- */
+        .main-content-admin {
+            margin-left: 250px;
+            /* J'ai ajouté 70px en haut pour laisser de la place au bouton flottant */
+            padding: 70px 30px 30px 30px; 
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .main-content-admin.expanded {
+            margin-left: 0;
+        }
+
+        /* --- LE NOUVEAU BOUTON FLOTTANT (MAGIQUE) --- */
+        .toggle-btn {
+            position: fixed; /* Il flotte au-dessus de tout */
+            top: 15px;
+            left: 265px; /* Juste à droite de la sidebar (250px + 15px) */
+            z-index: 1001;
+            background-color: white;
+            color: #343a40;
+            border: none;
+            padding: 6px 12px;
+            font-size: 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; /* Pour qu'il glisse en douceur */
+        }
+
+        .toggle-btn:hover {
+            background-color: #f8f9fa;
+            color: #0d6efd;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        /* Quand le contenu prend tout l'écran (menu fermé), le bouton glisse à gauche ! */
+        .main-content-admin.expanded .toggle-btn {
+            left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'admin/_sidebar.html' %}
+    
+    <div class="main-content-admin" id="main-content">
+        
+        <button class="toggle-btn" id="sidebarToggle" title="Ouvrir/Fermer le menu">
+            <i class="bi bi-list"></i>
+        </button>
+
+        {% block content %}{% endblock %}
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById("sidebarToggle");
+            const sidebar = document.querySelector(".admin-sidebar");
+            const mainContent = document.getElementById("main-content");
+
+            toggleBtn.addEventListener("click", function() {
+                sidebar.classList.toggle("collapsed");
+                mainContent.classList.toggle("expanded");
+            });
+        });
+    </script>
+</body>
+</html>
