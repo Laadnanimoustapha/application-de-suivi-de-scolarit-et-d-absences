@@ -37,7 +37,7 @@ def main_function():
 def login_etudiant():
     # En Flask classique, on récupère les données des balises <input> comme ça :
     email = request.form.get("email")
-    password = request.form.get("password")
+    password = request.form.get("mot_de_passe")
     
     eleve_id = check_etudiant(email, password)
     if eleve_id:
@@ -542,7 +542,7 @@ def eleve_dash():
     recent_absences = absences[:5]
     total_absences = sum(1 for a in absences if not a.justifiee)
     
-    total_points = sum(note.valeur for note in notes)
+    total_points = sum(note['note'] for note in notes)
     moyenne = round(total_points / len(notes), 2) if notes else "N/A"
 
     return render_template("student/dashboard_eleve.html", eleve=eleve, notes=recent_notes, absences=recent_absences, total_absences=total_absences, moyenne=moyenne)
