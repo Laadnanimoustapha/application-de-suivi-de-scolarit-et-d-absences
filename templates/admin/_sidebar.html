@@ -1,0 +1,80 @@
+<div class="admin-sidebar shadow">
+    <div class="sidebar-header text-center py-4 border-bottom">
+        <h4 class="fw-bold"><i class="bi bi-mortarboard-fill text-info"></i> Scolarité</h4>
+        <small class="text-muted">Espace Administrateur</small>
+    </div>
+    
+    <ul class="sidebar-nav">
+        <li class="nav-category">Gestion globale</li>
+        
+        <li>
+            <a href="{{ url_for('admin_dash') }}" class="nav-item-admin">
+                <i class="bi bi-speedometer2"></i>
+                <span>Tableau de bord</span>
+            </a>
+        </li>
+        
+        <li class="nav-category">Utilisateurs</li>
+        <li>
+            <a href="{{ url_for('gestion_eleves') }}" class="nav-item-admin">
+                <i class="bi bi-people"></i>
+                <span>Élèves (CRUD)</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('gestion_profs') }}" class="nav-item-admin">
+                <i class="bi bi-person-badge"></i>
+                <span>Enseignants (CRUD)</span>
+            </a>
+        </li>
+        
+        <li class="nav-category">Structure</li>
+        <li>
+            <a href="{{ url_for('gestion_classes') }}" class="nav-item-admin">
+                <i class="bi bi-door-open"></i>
+                <span>Classes </span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('affectation_eleves') }}" class="nav-item-admin">
+                <i class="bi bi-book"></i>
+                <span>Affectation des Élèves (Élève ↔ Classe)</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('gestion_assignations') }}" class="nav-item-admin">
+                <i class="bi bi-diagram-3"></i>
+                <span>Assignations (Prof ↔ Matière ↔ Classe)</span>
+            </a>
+        </li>
+        
+        <li class="nav-category">Vie Scolaire</li>
+        <li>
+            <a href="{{ url_for('gestion_configuration') }}" class="nav-item-admin">
+                <i class="bi bi-calendar-event"></i>
+                <span>Années & Semestres</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('gestion_absences') }}" class="nav-item-admin">
+                <i class="bi bi-check-circle"></i>
+                <span>Gestion des Absences</span>
+            </a>
+        </li>
+        
+        <li class="nav-category">Édition</li>
+        <li>
+            <a href="#" class="nav-item-admin">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Bulletins PDF</span>
+            </a>
+        </li>
+        
+        <li class="mt-4">
+            <a href="{{ url_for('logout') }}" class="nav-item-admin text-danger">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Déconnexion</span>
+            </a>
+        </li>
+    </ul>
+</div>

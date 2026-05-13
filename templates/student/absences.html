@@ -1,0 +1,52 @@
+{% extends 'student/base_student.html' %}
+
+{% block page_title %}Mes Absences{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Historique des Absences</h1>
+    <p>Suivi de votre assiduite</p>
+</header>
+
+<div class="data-card">
+    {% if absences %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Matiere</th>
+                <th>Statut</th>
+                <th>Motif</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for abs in absences %}
+            <tr>
+                <td style="font-weight: 600;">{{ abs.date_absence.strftime('%d/%m/%Y') }}</td>
+                <td>{{ abs.matiere_nom }}</td>
+                <td>
+                    {% if abs.justifiee %}
+                        <span class="status-badge justified"><i class="bi bi-check-circle-fill"></i> Justifiee</span>
+                    {% else %}
+                        <span class="status-badge unjustified"><i class="bi bi-exclamation-circle-fill"></i> Non Justifiee</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-secondary);">
+                    {% if abs.justifiee and abs.motif_justification %}
+                        {{ abs.motif_justification }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-calendar-check d-block" style="color: var(--success);"></i>
+        <p>Aucune absence enregistree.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

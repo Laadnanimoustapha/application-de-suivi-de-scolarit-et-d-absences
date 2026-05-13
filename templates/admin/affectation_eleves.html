@@ -1,0 +1,78 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="fw-bold text-primary mb-4"><i class="bi bi-person-plus-fill"></i> Affectation des Élèves</h3>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-3">Placer un élève dans une classe</h5>
+                <form method="POST">
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Élève en attente d'affectation</label>
+                        <select name="eleve_id" class="form-select bg-light" required>
+                            <option value="" disabled selected>Sélectionner un élève...</option>
+                            {% for eleve in eleves %}
+                                <option value="{{ eleve.id }}">
+                                    {{ eleve.nom }} {{ eleve.prenom }} ({{ eleve.numero_eleve }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if not eleves %}
+                            <small class="text-success"><i class="bi bi-check-circle"></i> Tous les élèves ont déjà une classe !</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">Classe de destination</label>
+                        <select name="classe_id" class="form-select bg-light" required>
+                            <option value="" disabled selected>Sélectionner la classe...</option>
+                            {% for classe in classes %}
+                                <option value="{{ classe.id }}">
+                                    {{ classe.nom }} ({{ classe.filiere }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" {% if not eleves %}disabled{% endif %}>
+                        Confirmer l'affectation
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card border-0 bg-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-info-circle"></i> Règles d'affectation</h5>
+                    <ul class="list-group list-group-flush bg-transparent">
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check2 text-success me-2"></i> Les élèves apparaissant dans la liste sont ceux qui n'ont <strong>aucune classe</strong> pour l'année en cours.
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check2 text-success me-2"></i> La capacité maximale est strictement fixée à <strong>10 élèves par classe</strong>.
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check2 text-success me-2"></i> Si une classe atteint sa limite, le système bloquera automatiquement les nouvelles affectations.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
