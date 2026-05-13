@@ -1,0 +1,206 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-secondary"><i class="bi bi-mortarboard-fill me-2"></i>Gestion des Élèves</h2>
+        <div>
+            <button class="btn btn-primary me-2 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#formulaireAjout" aria-expanded="false" aria-controls="formulaireAjout">
+                <i class="bi bi-plus-circle me-1"></i> Ajouter un élève
+            </button>
+            
+            <a href="{{ url_for('admin_dash') }}" class="btn btn-outline-secondary">Retour au Dashboard</a>
+        </div>
+    </div>
+
+    <div class="collapse mb-5" id="formulaireAjout">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white fw-bold">
+                <i class="bi bi-person-plus-fill me-2"></i>Nouveau dossier d'inscription
+            </div>
+            <div class="card-body bg-white p-4">
+                <form action="#" method="POST">
+                    
+                    <h6 class="text-primary border-bottom pb-2 mb-3">Informations Personnelles</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Nom</label>
+                            <input type="text" class="form-control bg-light" name="nom" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Prénom</label>
+                            <input type="text" class="form-control bg-light" name="prenom" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Date de naissance</label>
+                            <input type="date" class="form-control bg-light" name="date_naissance" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">Sexe</label>
+                            <select class="form-select bg-light" name="sexe" required>
+                                <option value="" selected disabled>Choisir...</option>
+                                <option value="M">M</option>
+                                <option value="F">F</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-bold">Adresse complète</label>
+                            <input type="text" class="form-control bg-light" name="adresse">
+                        </div>
+                    </div>
+                    <h6 class="text-primary border-bottom pb-2 mb-3">Scolarité & Accès</h6>
+                    <div class="row g-3 mb-4">
+                        <!-- <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted">Filière</label>
+                            <select class="form-select" name="filiere" required>
+                                <option value="" selected disabled>Choisir la filière...</option>
+                                <option value="Sciences Physiques (PC)">Sciences Physiques (PC)</option>
+                                <option value="SVT">Sciences de la Vie et de la Terre (SVT)</option>
+                                <option value="Sciences Maths A">Sciences Maths A</option>
+                                <option value="Sciences Maths B">Sciences Maths B</option>
+                                <option value="Sciences Economiques">Sciences Économiques</option>
+                                <option value="Lettres et Sciences Humaines">Lettres et Sciences Humaines</option>
+                            </select>
+                        </div> -->
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Email </label>
+                            <input type="email" class="form-control bg-light" name="email" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">Mot de passe provisoire</label>
+                            <input type="password" class="form-control bg-light" name="mot_de_passe" required>
+                        </div>
+                    </div>
+
+                    <h6 class="text-primary border-bottom pb-2 mb-3">Contact Tuteur (Parents)</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Nom et Prénom du Tuteur</label>
+                            <input type="text" class="form-control bg-light" name="nom_tuteur">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">Téléphone du Tuteur</label>
+                            <input type="tel" class="form-control bg-light" name="tel_tuteur">
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="button" class="btn btn-light me-2" data-bs-toggle="collapse" data-bs-target="#formulaireAjout">Annuler</button>
+                        <button type="submit" class="btn btn-primary px-5"><i class="bi bi-save me-2"></i>Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-ul me-2"></i>Liste des élèves inscrits</span>
+            <!-- Le Filtre par Classe -->
+            <!-- <select id="filtreClasse" class="form-select form-select-sm" style="width: auto;">
+            <option value="all">Toutes les classes</option>
+            <option value="TC">Tronc Commun</option>
+            <option value="1A">1A</option>
+            <option value="2A">2A</option>
+    </select> -->
+            <input type="text" id="barreRecherche" class="form-control form-control-sm w-25" placeholder="Chercher un élève...">
+        </div>
+        <div class="card-body bg-white p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted">
+                        <tr>
+                            <th>Numéro d'élève</th>
+                            <th>Nom & Prénom</th>
+                            <!-- <th></th>
+                            <th></th> -->
+                            <th>Email</th>
+                            <th>Tuteur</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpsTableauEleves">
+                        {% if eleves %}
+                            {% for eleve in eleves %}
+                            <tr>
+                                <td class="text-muted fw-bold">{{ eleve.numero_eleve }}</td>
+                                <td>
+                                    <span class="fw-bold">{{ eleve.nom }}</span> {{ eleve.prenom }}
+                                </td>
+                                <!-- <td><span class="badge bg-info text-dark">{{ eleve.nom_classe }}</span></td>
+                                <td><span class="badge bg-secondary text-white">{{ eleve.filiere }}</span></td> -->
+                                <td>{{ eleve.email }}</td>
+                                <td>
+                                    {{ eleve.nom_tuteur }}<br>
+                                    <small class="text-muted"><i class="bi bi-telephone-fill me-1"></i>{{ eleve.tel_tuteur }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ url_for('consulter_notes_eleve', id=eleve.id) }}" class="btn btn-sm btn-outline-success" title="Consulter les notes"><i class="bi bi-eye"></i></a>
+                                    <a href="{{ url_for('route_modifier_eleve', id=eleve.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <a href="{{ url_for('supprimer_eleve', id=eleve.id) }}" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    onclick="return confirm('Attention : Êtes-vous sûr de vouloir supprimer définitivement cet élève ?');">
+                                    <i class="bi bi-trash"></i>
+                                    </a>                                
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="bi bi-info-circle fs-4 d-block mb-2"></i>
+                                    Aucun élève dans la base de données pour le moment.
+                                </td>
+                            </tr>
+
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+// On attend que la page soit bien chargée
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // On récupère nos éléments HTML
+    const barreRecherche = document.getElementById("barreRecherche");
+    const filtreClasse = document.getElementById("filtreClasse");
+    const lignesTableau = document.querySelectorAll("#corpsTableauEleves tr");
+
+    // Fonction qui fait le filtrage
+    function filtrerEleves() {
+        // On récupère ce que l'utilisateur a tapé et on le met en minuscules
+        const texteRecherche = barreRecherche.value.toLowerCase();
+        const classeSelectionnee = filtreClasse.value.toLowerCase();
+
+        // On vérifie chaque ligne du tableau
+        lignesTableau.forEach(ligne => {
+            // "ligne.textContent" récupère tout le texte de la ligne (nom, email, filière...)
+            const contenuLigne = ligne.textContent.toLowerCase();
+            
+            // On cible spécifiquement la colonne de la classe (adapte le chiffre [2] si ta colonne Classe n'est pas la 3ème)
+            const texteClasse = ligne.cells[2] ? ligne.cells[2].textContent.toLowerCase().trim() : "";
+
+            // Conditions
+            const correspondRecherche = contenuLigne.includes(texteRecherche);
+            const correspondFiltre = (classeSelectionnee === "all" || texteClasse === classeSelectionnee);
+
+            // Si la ligne correspond à la recherche ET au filtre, on l'affiche, sinon on la cache
+            if (correspondRecherche && correspondFiltre) {
+                ligne.style.display = ""; // Afficher
+            } else {
+                ligne.style.display = "none"; // Cacher
+            }
+        });
+    }
+
+    // On déclenche le filtrage à chaque fois qu'on tape une touche ou qu'on change le filtre
+    barreRecherche.addEventListener("keyup", filtrerEleves);
+    filtreClasse.addEventListener("change", filtrerEleves);
+});
+</script>
+{% endblock %}

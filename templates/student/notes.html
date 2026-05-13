@@ -1,0 +1,53 @@
+{% extends 'student/base_student.html' %}
+
+{% block page_title %}Mes Notes{% endblock %}
+
+{% block content %}
+<header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1>Releve de Notes</h1>
+        <p>Historique complet de vos evaluations</p>
+    </div>
+    <button type="button" class="btn-student" disabled title="PDF en cours de developpement">
+        <i class="bi bi-file-earmark-pdf"></i> Telecharger PDF
+    </button>
+</header>
+
+<div class="data-card">
+    {% if notes %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Matiere</th>
+                <th>Type d'Evaluation</th>
+                <th>Date</th>
+                <th style="text-align: right;">Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+            <tr>
+                <td style="font-weight: 600;">{{ note.matiere }}</td>
+                <td>
+                    {% if note.type_evaluation == 'Examen' %}
+                        <span class="status-badge exam">Examen</span>
+                    {% elif note.type_evaluation == 'Devoir' %}
+                        <span class="status-badge homework">Devoir</span>
+                    {% else %}
+                        <span class="status-badge">{{ note.type_evaluation }}</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-secondary);">{{ note.date_saisie.strftime('%d/%m/%Y') if note.date_saisie else 'N/A' }}</td>
+                <td style="text-align: right;"><span class="grade-value">{{ note.valeur }}/20</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-inbox d-block"></i>
+        <p>Aucune note n'a encore ete saisie.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

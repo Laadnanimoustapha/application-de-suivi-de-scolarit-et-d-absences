@@ -1,0 +1,68 @@
+{% extends 'student/base_student.html' %}
+
+{% block page_title %}Mon Profil{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Mon Profil</h1>
+    <p>Informations personnelles et coordonnees</p>
+</header>
+
+<div class="row g-3">
+    <!-- Personal Info -->
+    <div class="col-md-6">
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="bi bi-person me-2" aria-hidden="true"></i> Informations Personnelles
+            </div>
+            <div class="info-row">
+                <span class="label">Nom complet</span>
+                <span class="value">{{ eleve.nom }} {{ eleve.prenom }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Matricule</span>
+                <span class="value" style="font-variant-numeric: tabular-nums;">{{ eleve.numero_eleve }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Date de naissance</span>
+                <span class="value">{{ eleve.date_naissance.strftime('%d/%m/%Y') if eleve.date_naissance else 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Sexe</span>
+                <span class="value">{{ eleve.sexe }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact & Guardian -->
+    <div class="col-md-6">
+        <div class="info-card" style="margin-bottom: 12px;">
+            <div class="info-card-header">
+                <i class="bi bi-envelope me-2" aria-hidden="true"></i> Contact
+            </div>
+            <div class="info-row">
+                <span class="label">Email</span>
+                <span class="value">{{ eleve.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Adresse</span>
+                <span class="value">{{ eleve.adresse if eleve.adresse else 'Non renseignee' }}</span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="bi bi-people me-2" aria-hidden="true"></i> Tuteur Legal
+            </div>
+            <div class="info-row">
+                <span class="label">Nom</span>
+                <span class="value">{{ eleve.nom_tuteur if eleve.nom_tuteur else 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Telephone</span>
+                <span class="value">{{ eleve.tel_tuteur if eleve.tel_tuteur else 'N/A' }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

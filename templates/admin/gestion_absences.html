@@ -1,0 +1,100 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-secondary">
+        <i class="bi bi-calendar-x text-danger me-2"></i> Gestion des Absences
+    </h3>
+    <span class="badge bg-danger rounded-pill fs-6">{{ absences|length }} en attente</span>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Date</th>
+                        <th>Élève</th>
+                        <th>Classe</th>
+                        <th>Matière</th>
+                        <th>Statut</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in absences %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">{{ a.date_absence }}</td>
+                        <td class="fw-bold text-dark">{{ a.nom }} {{ a.prenom }}</td>
+                        <td><span class="badge bg-secondary">{{ a.classe_nom }}</span></td>
+                        <td>{{ a.matiere_nom }}</td>
+                        
+                        <td><span class="badge bg-danger">Non Justifiée</span></td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-outline-success btn-sm fw-bold" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalJustifier{{ a.id }}">
+                                <i class="bi bi-check2-circle"></i> Justifier
+                            </button>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="modalJustifier{{ a.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title"><i class="bi bi-shield-check me-2"></i> Justifier l'absence</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="{{ url_for('justifier_absence') }}" method="POST">
+                                    <div class="modal-body">
+                                        <p>Justification pour l'absence de <strong>{{ a.nom }} {{ a.prenom }}</strong> le <strong>{{ a.date_absence }}</strong>.</p>
+                                        
+                                        <input type="hidden" name="absence_id" value="{{ a.id }}">
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Motif / Justificatif :</label>
+                                            <select name="motif" class="form-select mb-3" required>
+                                                <option value="" disabled selected>Choisir un motif...</option>
+                                                <option value="Certificat Médical">Certificat Médical</option>
+                                                <option value="Convocation Officielle">Convocation Officielle</option>
+                                                <option value="Problème Familial Majeur">Problème Familial Majeur</option>
+                                                <option value="Autre (Voir direction)">Autre (Voir direction)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-success fw-bold">Valider la justification</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-emoji-smile fs-1 text-muted d-block mb-2"></i>
+                            <h5 class="text-muted">Aucune absence non justifiée.</h5>
+                            <p class="text-muted small">Tout est à jour !</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

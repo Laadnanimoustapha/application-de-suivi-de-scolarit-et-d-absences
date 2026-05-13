@@ -1,0 +1,69 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h2 class="mb-4 text-secondary">Tableau de Bord Administrateur</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 bg-white p-3">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill text-primary fs-1"></i>
+                        <h5 class="card-title mt-2">Élèves</h5>
+                        <p class="card-text fs-3 fw-bold">{{ total_eleves }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 bg-white p-3">
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-badge-fill text-success fs-1"></i>
+                        <h5 class="card-title mt-2">Professeurs</h5>
+                        <p class="card-text fs-3 fw-bold">{{ total_profs }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 bg-white p-3">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-x text-danger fs-1"></i>
+                        <h5 class="card-title mt-2">Absences Non Justifiées</h5>
+                        <p class="card-text fs-3 fw-bold">{{ total_absences }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="mt-5">
+            <h3 class="text-secondary mb-3">Actions de Gestion</h3>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('gestion_eleves') }}" class="btn btn-primary px-4 py-2">
+                    <i class="bi bi-mortarboard-fill me-2"></i> Gestion des Élèves
+                </a>
+                
+                <a href="{{ url_for('gestion_profs') }}" class="btn btn-success px-4 py-2">
+                    <i class="bi bi-person-workspace me-2"></i> Gestion des Profs
+                </a>
+                <a href="{{ url_for('gestion_classes') }}" class="btn btn-info px-4 py-2">
+                    <i class="bi bi-door-open me-2"></i> Gestion des Classes
+                </a>
+                <a href="{{ url_for('gestion_assignations') }}" class="btn btn-info px-4 py-2">
+                    <i class="bi bi-diagram-3 me-2"></i> Assignations (Prof ↔ Matière ↔ Classe)
+                </a>
+                <a href="{{ url_for('affectation_eleves') }}" class="btn btn-info px-4 py-2">
+                    <i class="bi bi-diagram-3 me-2"></i> Affectation des Élèves (Élève ↔ Classe)
+                </a>
+                <a href="{{ url_for('gestion_absences') }}" class="btn btn-warning text-dark px-4 py-2">
+                    <i class="bi bi-calendar-check-fill me-2"></i> Gestion des Absences
+                </a>
+                <a href="{{ url_for('gestion_configuration') }}" class="btn btn-secondary px-4 py-2">
+                    <i class="bi bi-gear-fill me-2"></i> Configuration de l'École
+                </a>
+            </div>
+        </div> -->
+    </div>
+</div>
+{% endblock %}

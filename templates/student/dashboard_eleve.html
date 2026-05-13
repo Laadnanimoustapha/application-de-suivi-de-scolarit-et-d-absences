@@ -1,0 +1,140 @@
+{% extends 'student/base_student.html' %}
+
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Tableau de bord</h1>
+    <p>Vue d'ensemble de votre parcours academique</p>
+</header>
+
+<!-- KPI Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon accent">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div>
+                <div class="stat-label">Moyenne Generale</div>
+                <div class="stat-value">{{ moyenne }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon {% if total_absences > 0 %}danger{% else %}success{% endif %}">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <div>
+                <div class="stat-label">Absences Non Justifiees</div>
+                <div class="stat-value">{{ total_absences }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="bi bi-journal-check"></i>
+            </div>
+            <div>
+                <div class="stat-label">Notes Enregistrees</div>
+                <div class="stat-value">{{ notes|length }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Two column data -->
+<div class="row g-3">
+    <!-- Recent Grades -->
+    <div class="col-md-6">
+        <div class="data-card">
+            <div class="data-card-header">
+                <h2>Dernieres Notes</h2>
+                <a href="{{ url_for('eleve_notes') }}" class="btn-student">
+                    Voir tout <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            {% if notes %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Matiere</th>
+                        <th>Type</th>
+                        <th style="text-align: right;">Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for note in notes %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ note.matiere }}</td>
+                        <td>
+                            {% if note.type_evaluation == 'Examen' %}
+                                <span class="status-badge exam">Examen</span>
+                            {% elif note.type_evaluation == 'Devoir' %}
+                                <span class="status-badge homework">Devoir</span>
+                            {% else %}
+                                <span class="status-badge">{{ note.type_evaluation }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;"><span class="grade-value">{{ note.valeur }}/20</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox d-block"></i>
+                <p>Aucune note enregistree pour le moment.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Absences -->
+    <div class="col-md-6">
+        <div class="data-card">
+            <div class="data-card-header">
+                <h2>Dernieres Absences</h2>
+                <a href="{{ url_for('eleve_absences') }}" class="btn-student">
+                    Voir tout <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            {% if absences %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Matiere</th>
+                        <th style="text-align: right;">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for abs in absences %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ abs.date_absence.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ abs.matiere_nom }}</td>
+                        <td style="text-align: right;">
+                            {% if abs.justifiee %}
+                                <span class="status-badge justified">Justifiee</span>
+                            {% else %}
+                                <span class="status-badge unjustified">Non Justifiee</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-calendar-check d-block"></i>
+                <p>Aucune absence enregistree.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

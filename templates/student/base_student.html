@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Eleve - Scolarite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===================================== */
+        /* DESIGN SYSTEM TOKENS                  */
+        /* ===================================== */
+        :root {
+            --student-bg: #f0f2f5;
+            --sidebar-bg: #1a2332;
+            --sidebar-hover: #243044;
+            --sidebar-active: #2d5aa0;
+            --sidebar-text: #8896a8;
+            --sidebar-text-active: #ffffff;
+            --surface: #ffffff;
+            --text-primary: #1a2332;
+            --text-secondary: #5f6b7a;
+            --accent: #2d5aa0;
+            --accent-light: rgba(45, 90, 160, 0.08);
+            --success: #1a8754;
+            --danger: #c53030;
+            --warning: #d69e2e;
+            --radius: 8px;
+            --transition: 200ms ease;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--student-bg);
+            overflow-x: hidden;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        /* ===================================== */
+        /* SIDEBAR                               */
+        /* ===================================== */
+        .student-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding-top: 0;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .student-sidebar::-webkit-scrollbar { display: none; }
+        .student-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .student-sidebar.collapsed {
+            transform: translateX(-260px);
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-brand h5 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--sidebar-text-active);
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-brand small {
+            font-size: 0.75rem;
+            color: var(--sidebar-text);
+            display: block;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 12px 0;
+            margin: 0;
+            flex: 1;
+        }
+
+        .sidebar-nav .nav-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--sidebar-text);
+            opacity: 0.5;
+            padding: 20px 20px 6px;
+        }
+
+        .sidebar-nav .nav-link-student {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            margin: 2px 8px;
+            border-radius: 6px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all var(--transition);
+        }
+
+        .sidebar-nav .nav-link-student i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav .nav-link-student:hover {
+            background-color: var(--sidebar-hover);
+            color: var(--sidebar-text-active);
+        }
+
+        .sidebar-nav .nav-link-student.active {
+            background-color: var(--sidebar-active);
+            color: var(--sidebar-text-active);
+        }
+
+        .sidebar-footer {
+            padding: 16px 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-footer .nav-link-student {
+            color: var(--danger);
+        }
+        .sidebar-footer .nav-link-student:hover {
+            background-color: rgba(197, 48, 48, 0.1);
+        }
+
+        /* ===================================== */
+        /* MAIN CONTENT AREA                     */
+        /* ===================================== */
+        .student-main {
+            margin-left: 260px;
+            padding: 0;
+            min-height: 100vh;
+            transition: margin-left var(--transition);
+        }
+
+        .student-main.expanded {
+            margin-left: 0;
+        }
+
+        /* --- Top bar --- */
+        .student-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: var(--surface);
+            border-bottom: 1px solid #e2e5e9;
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .toggle-btn-student {
+            background: none;
+            border: 1px solid #e2e5e9;
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all var(--transition);
+        }
+
+        .toggle-btn-student:hover {
+            background: var(--student-bg);
+            color: var(--text-primary);
+        }
+
+        .topbar-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--student-bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: 'Inter', monospace;
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .topbar-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .topbar-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* --- Page content --- */
+        .page-content {
+            padding: 28px 32px;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .page-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 4px 0 0;
+        }
+
+        /* ===================================== */
+        /* REUSABLE COMPONENTS                   */
+        /* ===================================== */
+
+        /* --- Stat Cards --- */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid #e2e5e9;
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: box-shadow var(--transition);
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.accent {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .stat-icon.success {
+            background: rgba(26, 135, 84, 0.08);
+            color: var(--success);
+        }
+        .stat-icon.danger {
+            background: rgba(197, 48, 48, 0.08);
+            color: var(--danger);
+        }
+        .stat-icon.warning {
+            background: rgba(214, 158, 46, 0.08);
+            color: var(--warning);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        /* --- Data Tables --- */
+        .data-card {
+            background: var(--surface);
+            border: 1px solid #e2e5e9;
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .data-card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e5e9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .data-card-header h2 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead th {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-bottom: 1px solid #e2e5e9;
+            background: #f8f9fb;
+        }
+
+        .data-table tbody td {
+            padding: 12px 20px;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid #f0f2f5;
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fb;
+        }
+
+        /* --- Status Badges --- */
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-badge.justified {
+            background: rgba(26, 135, 84, 0.08);
+            color: var(--success);
+        }
+
+        .status-badge.unjustified {
+            background: rgba(197, 48, 48, 0.08);
+            color: var(--danger);
+        }
+
+        .status-badge.exam {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .status-badge.homework {
+            background: rgba(214, 158, 46, 0.08);
+            color: var(--warning);
+        }
+
+        /* --- Grade display --- */
+        .grade-value {
+            font-family: 'Inter', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* --- Empty state --- */
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
+        /* --- Info Cards (Profile) --- */
+        .info-card {
+            background: var(--surface);
+            border: 1px solid #e2e5e9;
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .info-card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e5e9;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+        }
+
+        .info-row {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 0.875rem;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-row .label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .info-row .value {
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* --- Buttons --- */
+        .btn-student {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid #e2e5e9;
+            background: var(--surface);
+            color: var(--text-primary);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition);
+        }
+
+        .btn-student:hover {
+            background: var(--student-bg);
+            color: var(--text-primary);
+        }
+
+        .btn-student.primary {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .btn-student.primary:hover {
+            background: #24498a;
+            color: white;
+        }
+
+        /* ===================================== */
+        /* RESPONSIVE                            */
+        /* ===================================== */
+        @media (max-width: 768px) {
+            .student-sidebar {
+                transform: translateX(-260px);
+            }
+            .student-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .student-main {
+                margin-left: 0;
+            }
+            .page-content {
+                padding: 20px 16px;
+            }
+            .student-topbar {
+                padding: 0 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="student-sidebar" id="studentSidebar" aria-label="Navigation principale">
+        <div class="sidebar-brand">
+            <h5><i class="bi bi-mortarboard-fill me-2" aria-hidden="true"></i>Scolarite</h5>
+            <small>Espace Eleve</small>
+        </div>
+        
+        <ul class="sidebar-nav">
+            <li class="nav-label">Navigation</li>
+            <li>
+                <a href="{{ url_for('eleve_dash') }}" class="nav-link-student {% if request.endpoint == 'eleve_dash' %}active{% endif %}" {% if request.endpoint == 'eleve_dash' %}aria-current="page"{% endif %}>
+                    <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('eleve_notes') }}" class="nav-link-student {% if request.endpoint == 'eleve_notes' %}active{% endif %}" {% if request.endpoint == 'eleve_notes' %}aria-current="page"{% endif %}>
+                    <i class="bi bi-journal-text" aria-hidden="true"></i>
+                    <span>Mes Notes</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('eleve_absences') }}" class="nav-link-student {% if request.endpoint == 'eleve_absences' %}active{% endif %}" {% if request.endpoint == 'eleve_absences' %}aria-current="page"{% endif %}>
+                    <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                    <span>Mes Absences</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('eleve_profil') }}" class="nav-link-student {% if request.endpoint == 'eleve_profil' %}active{% endif %}" {% if request.endpoint == 'eleve_profil' %}aria-current="page"{% endif %}>
+                    <i class="bi bi-person" aria-hidden="true"></i>
+                    <span>Mon Profil</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="nav-link-student">
+                <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
+                <span>Deconnexion</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="student-main" id="studentMain">
+        <!-- Top Bar -->
+        <header class="student-topbar">
+            <div class="topbar-left">
+                <button class="toggle-btn-student" id="sidebarToggle" title="Menu" type="button">
+                    <i class="bi bi-list"></i>
+                </button>
+                <span class="topbar-title">{% block page_title %}{% endblock %}</span>
+            </div>
+            <div class="topbar-right">
+                {% if eleve %}
+                <span class="topbar-badge">{{ eleve.numero_eleve }}</span>
+                <div class="topbar-user">
+                    <div class="topbar-avatar">{{ eleve.prenom[0] }}{{ eleve.nom[0] }}</div>
+                    <span class="topbar-name">{{ eleve.prenom }} {{ eleve.nom }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <section class="page-content">
+            {% block content %}{% endblock %}
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById("sidebarToggle");
+            const sidebar = document.getElementById("studentSidebar");
+            const mainContent = document.getElementById("studentMain");
+
+            toggleBtn.addEventListener("click", function() {
+                sidebar.classList.toggle("collapsed");
+                mainContent.classList.toggle("expanded");
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
