@@ -75,10 +75,6 @@ def prof_dash():
     # On l'envoie au fichier HTML
     return render_template("dashboard_prof.html", nom=nom_utilisateur)
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("index"))
 
 @app.route("/prof/saisir-notes")
 def saisie_notes_page():
