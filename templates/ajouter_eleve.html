@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-person-plus"></i> Ajouter un nouvel Étudiant</h3>
+        </div>
+        <div class="card-body">
+            <form action="/ajouter_eleve" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Nom Complet</label>
+                    <input type="text" name="nom" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Filière</label>
+                    <select name="filiere" class="form-control">
+                        <option value="ID">Informatique Décisionnelle (ID)</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">Enregistrer l'étudiant</button>
+                <a href="/" class="btn btn-secondary">Annuler</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

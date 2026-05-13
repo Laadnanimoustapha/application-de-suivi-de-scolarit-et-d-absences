@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white d-flex justify-content-between">
+            <h4><i class="fas fa-calendar-check"></i> Faire l'Appel</h4>
+            <span>{{ "11 Mai 2026" }}</span>
+        </div>
+        <div class="card-body">
+            <form action="/prof/valider-appel" method="POST">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Date de la séance</label>
+                        <input type="date" name="date_appel" class="form-control" value="2026-05-11" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Séance (Heure)</label>
+                        <select name="seance" class="form-control">
+                            <option>08:30 - 10:30</option>
+                            <option>10:30 - 12:30</option>
+                            <option>14:30 - 16:30</option>
+                            <option>16:30 - 18:30</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nom de l'Étudiant</th>
+                            <th class="text-center">Statut</th>
+                            <th>Justification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eleve in eleves %}
+                        <tr>
+                            <td class="fw-bold">{{ eleve.nom }} {{ eleve.prenom }}</td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="statut_{{ eleve.id }}" id="pres_{{ eleve.id }}" value="Présent" checked>
+                                    <label class="btn btn-outline-success btn-sm" for="pres_{{ eleve.id }}">P</label>
+
+                                    <input type="radio" class="btn-check" name="statut_{{ eleve.id }}" id="abs_{{ eleve.id }}" value="Absent">
+                                    <label class="btn btn-outline-danger btn-sm" for="abs_{{ eleve.id }}">A</label>
+                                </div>
+                            </td>
+                            <td>
+                                <select name="justification_{{ eleve.id }}" class="form-select form-select-sm">
+                                    <option value="Non justifiée">Non justifiée</option>
+                                    <option value="Justifiée">Justifiée</option>
+                                </select>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-danger w-100 mt-3">Enregistrer l'Appel</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
