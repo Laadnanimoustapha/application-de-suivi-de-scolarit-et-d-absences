@@ -16,12 +16,12 @@ engine = create_engine(DATABASE_KEY, pool_pre_ping=True, pool_recycle=300)
 
 # --- VÉRIFICATION DES CONNEXIONS (CORRIGÉ) ---
 
-def check_etudiant(email, password): 
-    with engine.connect() as conn:
-        # On cherche dans 'utilisateur' avec le rôle 'eleve'
-        query = text("SELECT * FROM utilisateur WHERE email = :email AND mot_de_passe = :password AND role = 'eleve'")
-        result = conn.execute(query, {"email": email, "password": password}).fetchone()
-        return result is not None 
+# def check_etudiant(email, password): 
+#     with engine.connect() as conn:
+#         # On cherche dans 'utilisateur' avec le rôle 'eleve'
+#         query = text("SELECT * FROM utilisateur WHERE email = :email AND mot_de_passe = :password AND role = 'eleve'")
+#         result = conn.execute(query, {"email": email, "password": password}).fetchone()
+#         return result is not None 
 
 def check_professeur(email, password):
     try:

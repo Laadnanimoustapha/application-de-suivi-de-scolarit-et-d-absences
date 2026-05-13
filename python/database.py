@@ -27,12 +27,16 @@ def check_etudiant(email,password): # check if the student has an account
         return None
 
 
-def check_professeur(email,password): # check if the profesor has an account 
-    with engine.connect() as conn:
-        query = text("SELECT * FROM professeur WHERE email = :email AND password = :password")
-        result = conn.execute(query,{"email" : email,"password" : password}).fetchone()
-
-        return result is not None 
+def check_professeur(email, password):
+    try:
+        with engine.connect() as conn:
+            # On sélectionne les colonnes nécessaires selon la table de Zakaria
+            query = text("SELECT id, nom, prenom FROM utilisateur WHERE email = :email AND mot_de_passe = :pw AND role = 'professeur'")
+            result = conn.execute(query, {"email": email, "pw": password}).mappings().fetchone()
+            return result # Retourne les données ou None
+    except Exception as e:
+        print(f"Erreur base de données : {e}")
+        return None
 #---------------------------------------------------------------------------------
 # ------------ LES METHODES DE L'ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
 # ---------------------------------------------------------------------------------
