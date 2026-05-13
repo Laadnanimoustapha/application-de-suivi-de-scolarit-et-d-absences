@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, session, flash
+from database import enregistrer_absence, enregistrer_notes_completes, get_eleves_par_classe, get_notes_existantes, get_user_by_id, update_profil_prof
 from python.database import *
 import os
 from dotenv import load_dotenv
@@ -53,7 +54,7 @@ def login_professeur():
     email = request.form.get("email")
     mot_de_passe = request.form.get("mot_de_passe")
     
-    prof = db.check_professeur(email, mot_de_passe)
+    prof = check_professeur(email, mot_de_passe)
     
     if prof:
         session['user_id'] = prof['id']
@@ -85,11 +86,11 @@ def saisie_notes_page():
     matiere = session.get('matiere', 'SVT')
     
     # 1. On récupère la liste des élèves (Classe ID 1)
-    eleves = db.get_eleves_par_classe(1) 
+    eleves = get_eleves_par_classe(1) 
     
     # 2. On récupère les notes déjà enregistrées dans MySQL
     # On utilise la fonction de lecture (il faut la créer dans database.py)
-    notes_existantes = db.get_notes_existantes(matiere)
+    notes_existantes = get_notes_existantes(matiere)
     
     # 3. On envoie les deux listes au template HTML
     return render_template("saisie_notes.html", eleves=eleves, notes_db=notes_existantes)
@@ -109,7 +110,7 @@ def valider_notes():
             val_c2 = float(c2 or 0)
             val_ex = float(ex or 0)
             moy = (val_c1 * 0.25) + (val_c2 * 0.25) + (val_ex * 0.50)
-            db.enregistrer_notes_completes(e_id, matiere, val_c1, val_c2, val_ex, moy)
+            enregistrer_notes_completes(e_id, matiere, val_c1, val_c2, val_ex, moy)
 
     # Cette ligne doit être alignée parfaitement sous le "for"
     flash("Les notes ont été enregistrées avec succès !", "success")
@@ -121,7 +122,7 @@ def mon_profil():
         return redirect(url_for("index"))
     
     # On récupère les infos actuelles pour les afficher dans le formulaire
-    user = db.get_user_by_id(session['user_id']) 
+    user = get_user_by_id(session['user_id']) 
     return render_template("profil.html", user=user)
 
 @app.route("/prof/update-profil", methods=["POST"])
@@ -130,7 +131,7 @@ def update_profil():
     nom = request.form.get("nom")
     mdp = request.form.get("mot_de_passe")
     
-    if db.update_profil_prof(session['user_id'], prenom, nom, mdp if mdp else None):
+    if update_profil_prof(session['user_id'], prenom, nom, mdp if mdp else None):
         session['prenom'] = prenom # On met à jour le prénom dans la session
         flash("Profil mis à jour avec succès !", "success")
     else:
@@ -144,7 +145,7 @@ def faire_appel():
         return redirect(url_for("index"))
     
     # On récupère les élèves de la classe 1
-    eleves = db.get_eleves_par_classe(1) 
+    eleves = get_eleves_par_classe(1) 
     return render_template("appel.html", eleves=eleves)
 
 @app.route("/prof/valider-appel", methods=["POST"])
@@ -152,14 +153,14 @@ def valider_appel():
     date_jour = request.form.get("date_appel")
     seance = request.form.get("seance")
     
-    eleves = db.get_eleves_par_classe(1)
+    eleves = get_eleves_par_classe(1)
     for eleve in eleves:
         # On récupère le statut et la justification
         statut = request.form.get(f"statut_{eleve.id}")
         justification = request.form.get(f"justification_{eleve.id}", "Non justifiée")
         
         # Enregistrement dans la table "absence"
-        db.enregistrer_absence(eleve.id, date_jour, seance, statut, justification)
+        enregistrer_absence(eleve.id, date_jour, seance, statut, justification)
     
     flash("L'appel a été enregistré avec succès !", "success")
     return redirect(url_for("prof_dash"))
