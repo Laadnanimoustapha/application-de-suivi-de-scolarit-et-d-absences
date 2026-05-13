@@ -5,12 +5,13 @@
     <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border-start border-5 border-success">
         <div class="container-fluid py-5">
             <h1 class="display-5 fw-bold text-success">Espace Professeur</h1>
-            <p class="col-md-8 fs-4 text-muted">Bienvenue Fatima. Ici, tu peux gérer tes classes, saisir les notes et suivre les absences.</p>
+            <h2 class="display-6">Bienvenue, {{ nom }} !</h2>   
+            <p>Vous êtes connecté(e) à votre espace enseignant.</p>   
             <hr>
             <div class="d-flex gap-3">
-                <a href="/prof/saisie_notes" class="btn btn-success btn-lg">
-                    <i class="bi bi-pencil-fill"></i> Saisir les Notes
-                </a>
+               <a href="{{ url_for('saisie_notes_page') }}" class="btn btn-success">
+                <i class="fas fa-edit"></i> Saisir les Notes
+               </a>
                 <a href="/prof/absences" class="btn btn-outline-danger btn-lg">
                     <i class="bi bi-person-x"></i> Faire l'Appel
                 </a>
@@ -18,4 +19,14 @@
         </div>
     </div>
 </div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 {% endblock %}

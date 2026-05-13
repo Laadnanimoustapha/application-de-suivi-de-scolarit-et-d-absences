@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-edit"></i> Saisie des Notes</h2>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <form action="/prof/valider-notes" method="POST">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nom de l'Étudiant</th>
+                            <th class="text-center">Note CC1 (25%)</th>
+                            <th class="text-center">Note CC2 (25%)</th>
+                            <th class="text-center">Examen (50%)</th>
+                            <th class="text-center">Moyenne</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eleve in eleves %}
+                        <tr id="row_{{ eleve.id }}">
+                            <td class="fw-bold">{{ eleve.nom }} {{ eleve.prenom }}</td>
+                            <td>
+                                <input type="number" step="0.25" min="0" max="20" id="cc1_{{ eleve.id }}" 
+                                       name="cc1_{{ eleve.id }}" class="form-control text-center" 
+                                       placeholder="/20" oninput="calculerMoyenne('{{ eleve.id }}')">
+                            </td>
+                            <td>
+                                <input type="number" step="0.25" min="0" max="20" id="cc2_{{ eleve.id }}" 
+                                       name="cc2_{{ eleve.id }}" class="form-control text-center" 
+                                       placeholder="/20" oninput="calculerMoyenne('{{ eleve.id }}')">
+                            </td>
+                            <td>
+                                <input type="number" step="0.25" min="0" max="20" id="exam_{{ eleve.id }}" 
+                                       name="exam_{{ eleve.id }}" class="form-control text-center" 
+                                       placeholder="/20" oninput="calculerMoyenne('{{ eleve.id }}')">
+                            </td>
+                            <td class="text-center fw-bold text-primary" id="moyenne_{{ eleve.id }}">-</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div class="d-flex justify-content-between p-3">
+                    <a href="{{ url_for('prof_dash') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Valider toute la classe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculerMoyenne(id) {
+    const cc1 = parseFloat(document.getElementById('cc1_' + id).value) || 0;
+    const cc2 = parseFloat(document.getElementById('cc2_' + id).value) || 0;
+    const exam = parseFloat(document.getElementById('exam_' + id).value) || 0;
+
+    if (document.getElementById('cc1_' + id).value || 
+        document.getElementById('cc2_' + id).value || 
+        document.getElementById('exam_' + id).value) {
+        
+        // Formule : 25% CC1 + 25% CC2 + 50% Examen
+        const moyenne = (cc1 * 0.25) + (cc2 * 0.25) + (exam * 0.50);
+        document.getElementById('moyenne_' + id).innerText = moyenne.toFixed(2);
+    } else {
+        document.getElementById('moyenne_' + id).innerText = "-";
+    }
+}
+</script>
+{% endblock %}
