@@ -15,7 +15,7 @@
                         <button class="nav-link active" id="etudiant-tab" data-bs-toggle="pill" data-bs-target="#etudiant" type="button">Élève</button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="prof-tab" data-bs-toggle="pill" data-bs-target="#prof" type="button">Prof</button>
+                        <button class="nav-link" id="prof-tab" data-bs-toggle="pill" data-bs-target="#prof" type="button">Professeur</button>
                     </li>
                     <li class="nav-item">
                         <button class="nav-link" id="admin-tab" data-bs-toggle="pill" data-bs-target="#admin" type="button">Admin</button>
@@ -31,7 +31,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Mot de passe</label>
-                                <input type="password" class="form-control" name="password" required>
+                                <input type="password" class="form-control" name="mot_de_passe" required>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Se connecter</button>
                         </form>
@@ -40,12 +40,12 @@
                     <div class="tab-pane fade" id="prof">
                         <form action="/login/professeur" method="POST">
                             <div class="mb-3">
-                                <label class="form-label">Email Professeur</label>
-                                <input type="email" class="form-control" name="email" required>
+                                <label class="form-label">Email Enseignant</label>
+                                <input type="email" class="form-control" name="email" required placeholder="youssef@lycee.ma">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Mot de passe</label>
-                                <input type="password" class="form-control" name="password" required>
+                                <input type="password" class="form-control" name="mot_de_passe" required>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Accès Enseignant</button>
                         </form>
@@ -54,7 +54,7 @@
                     <div class="tab-pane fade" id="admin">
                         <form action="/login/admin" method="POST">
                             <div class="mb-3">
-                                <label class="form-label">Email Admin</label>
+                                <label class="form-label">Email Administrateur</label>
                                 <input type="email" class="form-control" name="email" required>
                             </div>
                             <div class="mb-3">
@@ -66,12 +66,16 @@
                     </div>
                 </div>
 
-                <div id="error-message" class="alert alert-danger mt-3 d-none"></div>
+                {% if error %}
+                <div class="alert alert-danger mt-3 py-2 text-center small">
+                    {{ error }}
+                </div>
+                {% endif %}
 
             </div>
         </div>
     </div>
 </div>
-
-
 {% endblock %}
+
+
