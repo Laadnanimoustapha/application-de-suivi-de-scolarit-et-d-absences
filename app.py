@@ -275,7 +275,7 @@ def consulter_notes_eleve(id):
     eleve = get_eleve_by_id(id)
     
     # 2. On récupère ses notes
-    liste_notes = get_notes_by_eleve(id)
+    liste_notes = get_notes_by_eleve(id_eleve=id)
     
     # 3. On affiche la page
     return render_template("admin/consulter_notes.html", eleve=eleve, notes=liste_notes)
@@ -496,6 +496,32 @@ def gestion_configuration():
 
     config = get_configuration_actuelle()
     return render_template("admin/configuration.html", config=config)
+@app.route("/admin/bulletins", methods=["GET", "POST"])
+@admin_required
+def interface_bulletins():
+    # 1. Récupérer toutes les classes pour remplir la liste déroulante
+    # Assure-toi d'avoir une fonction get_toutes_les_classes() dans database.py
+    classes = get_toutes_les_classes() 
+    
+    eleves = []
+    classe_selectionnee = None
+    semestre_selectionne = "S1" # Par défaut
+
+    # 2. Si l'admin a cliqué sur "Chercher"
+    if request.method == "POST":
+        classe_selectionnee = request.form.get("classe_id")
+        semestre_selectionne = request.form.get("semestre")
+        
+        if classe_selectionnee:
+            # Récupérer les élèves de CETTE classe spécifique
+            # Assure-toi d'avoir une fonction get_eleves_by_classe(classe_id)
+            eleves = get_eleves_by_classe(classe_selectionnee)
+
+    return render_template("admin/interface_bulletins.html", 
+                           classes=classes, 
+                           eleves=eleves, 
+                           classe_selec=classe_selectionnee, 
+                           semestre_selec=semestre_selectionne)
 # -----------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------

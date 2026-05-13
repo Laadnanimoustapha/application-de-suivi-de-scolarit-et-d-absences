@@ -158,24 +158,25 @@ def get_eleve_by_id(id_eleve):
 def get_notes_by_eleve(id_eleve):
     try:
         with engine.connect() as conn:
-            # On suit le chemin exact : Note -> Classe_Matiere -> Matiere
             query = text("""
                 SELECT 
-                    n.id, 
-                    n.valeur, 
+                    n.id,
+                    m.nom AS matiere, 
+                    n.valeur AS note, 
                     n.type_evaluation, 
                     n.date_saisie, 
-                    m.nom AS matiere
+                    n.semestre,               -- AJOUT DU SEMESTRE
+                    c.annee_academique        -- AJOUT DE L'ANNÉE
                 FROM note n
                 JOIN classe_matiere cm ON n.classe_matiere_id = cm.id
+                JOIN classe c ON cm.classe_id = c.id
                 JOIN matiere m ON cm.matiere_id = m.id
-                WHERE n.eleve_id = :id_eleve
-                ORDER BY n.date_saisie DESC
+                WHERE n.eleve_id = :eleve_id
+                ORDER BY c.annee_academique DESC, n.semestre ASC, n.date_saisie DESC
             """)
-            resultats = conn.execute(query, {"id_eleve": id_eleve}).mappings().fetchall()
-            return resultats
+            return conn.execute(query, {"eleve_id": id_eleve}).mappings().fetchall()
     except Exception as e:
-        print(f"Erreur lors de la récupération des notes : {e}")
+        print(f"Erreur : {e}")
         return []
 def get_note_by_id(id_note):
     try:
