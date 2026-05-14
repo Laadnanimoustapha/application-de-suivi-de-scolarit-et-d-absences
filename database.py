@@ -177,34 +177,6 @@ def enregistrer_notes_completes(eleve_id, matiere, cc1, cc2, exam, moyenne): # O
         return False
     except Exception as e:
         print(f"Erreur SQL : {e}")
-def get_notes_existantes(classe_matiere_id):
-    try:
-        with engine.connect() as conn:
-            query = text("""
-                SELECT eleve_id, valeur, type_evaluation 
-                FROM note 
-                WHERE classe_matiere_id = :cm_id
-            """)
-            result = conn.execute(query, {"cm_id": classe_matiere_id}).mappings().fetchall()
-            
-            notes_dict = {}
-            for r in result:
-                e_id = r['eleve_id']
-                if e_id not in notes_dict:
-                    # Initialisation par défaut pour chaque élève
-                    notes_dict[e_id] = {'cc1': '', 'cc2': '', 'cc3': '', 'cc4': ''}
-                
-                # On mappe le type_evaluation (ex: 'cc1') à la clé du dictionnaire
-                t_eval = r['type_evaluation']
-                if t_eval in ['cc1', 'cc2', 'cc3', 'cc4']:
-                    notes_dict[e_id][t_eval] = r['valeur']
-                elif t_eval == 'controle': # Fallback pour ton test précédent
-                    notes_dict[e_id]['cc1'] = r['valeur']
-            
-            return notes_dict
-    except Exception as e:
-        print(f"Erreur SQL lecture : {e}")
-        return {}
 
 def update_profil_prof(user_id, nouveau_prenom, nouveau_nom, nouveau_mdp=None):
     try:
