@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 from database import enregistrer_absence, enregistrer_notes_completes, get_affectations_professeur, get_eleves_par_classe, get_infos_professeur, get_infos_selection, get_notes_existantes, sauvegarder_note_individuelle, supprimer_notes_eleve, supprimer_notes_eleve, supprimer_notes_eleve, get_user_by_id, update_profil_prof
 from python.database import *
+from python.supabase_storage import upload_justification
 import os
 from dotenv import load_dotenv
 from flask import jsonify
@@ -620,6 +621,40 @@ def eleve_absences():
     eleve_id = session.get('user_id')
     absences = get_absences_by_eleve(eleve_id)
     return render_template("student/absences.html", absences=absences)
+
+@app.route("/eleve/absences/justifier", methods=["POST"])
+@student_required
+def eleve_justifier_absence():
+    eleve_id = session.get('user_id')
+    absence_id = request.form.get("absence_id")
+
+    if not absence_id:
+        flash("Aucune absence selectionnee.", "danger")
+        return redirect(url_for("eleve_absences"))
+
+    # Security: verify the absence belongs to this student
+    absence = get_absence_by_id_for_eleve(absence_id, eleve_id)
+    if not absence:
+        flash("Absence introuvable.", "danger")
+        return redirect(url_for("eleve_absences"))
+
+    # Check if a file was submitted
+    fichier = request.files.get("fichier")
+    if not fichier or fichier.filename == "":
+        flash("Veuillez selectionner un fichier.", "danger")
+        return redirect(url_for("eleve_absences"))
+
+    # Upload to Supabase Storage
+    result = upload_justification(eleve_id, fichier.read(), fichier.filename)
+
+    if result["success"]:
+        # Save the URL in MySQL
+        submit_justification_eleve(absence_id, eleve_id, result["url"])
+        flash("Justificatif envoye avec succes. Il sera examine par l'administration.", "success")
+    else:
+        flash(f"Erreur lors de l'envoi : {result['error']}", "danger")
+
+    return redirect(url_for("eleve_absences"))
 
 @app.route("/eleve/profil")
 @student_required

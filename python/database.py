@@ -678,7 +678,7 @@ def get_absences_by_eleve(eleve_id):
     try:
         with engine.connect() as conn:
             query = text("""
-                SELECT a.id, m.nom AS matiere_nom, a.date_absence, a.justifiee, a.motif_justification
+                SELECT a.id, m.nom AS matiere_nom, a.date_absence, a.justifiee, a.motif_justification, a.fichier_justificatif
                 FROM absence a
                 JOIN classe_matiere cm ON a.classe_matiere_id = cm.id
                 JOIN matiere m ON cm.matiere_id = m.id
@@ -689,3 +689,36 @@ def get_absences_by_eleve(eleve_id):
     except Exception as e:
         print(f"Erreur SQL lecture absences élève : {e}")
         return []
+
+def get_absence_by_id_for_eleve(absence_id, eleve_id):
+    """Verifies that the absence belongs to the student before allowing justification."""
+    try:
+        with engine.connect() as conn:
+            query = text("""
+                SELECT id, justifiee 
+                FROM absence 
+                WHERE id = :absence_id AND eleve_id = :eleve_id
+            """)
+            return conn.execute(query, {"absence_id": absence_id, "eleve_id": eleve_id}).mappings().fetchone()
+    except Exception as e:
+        print(f"Erreur SQL get_absence_by_id_for_eleve : {e}")
+        return None
+
+def submit_justification_eleve(absence_id, eleve_id, file_url):
+    """Saves the justification file URL and marks the absence as pending review."""
+    try:
+        with engine.begin() as conn:
+            query = text("""
+                UPDATE absence 
+                SET fichier_justificatif = :file_url
+                WHERE id = :absence_id AND eleve_id = :eleve_id
+            """)
+            conn.execute(query, {
+                "file_url": file_url,
+                "absence_id": absence_id,
+                "eleve_id": eleve_id
+            })
+            return True
+    except Exception as e:
+        print(f"Erreur SQL submit_justification : {e}")
+        return False
