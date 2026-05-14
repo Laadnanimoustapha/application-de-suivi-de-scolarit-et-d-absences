@@ -435,9 +435,6 @@ document.addEventListener("DOMContentLoaded", function () {
             modalContext.innerHTML = "Absence du <strong>" + date + "</strong> en <strong>" + matiere + "</strong>";
 
             resetFileState();
-            modal.hidden = false;
-            // Force reflow for animation
-            modal.offsetHeight;
             modal.classList.add("is-visible");
         });
     });
@@ -445,7 +442,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Close modal
     function closeModal() {
         modal.classList.remove("is-visible");
-        setTimeout(function () { modal.hidden = true; }, 200);
     }
 
     modalCloseBtn.addEventListener("click", closeModal);
