@@ -10,3 +10,7 @@ __pycache__/
 # Données temporaires
 *.log
 static/uploads/*
+Guide_RedactionRapportStagePFE.pdf
+pdf_content.txt
+Rapport_Partie_Eleve.md
+generate_pdf.py
