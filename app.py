@@ -642,7 +642,7 @@ def eleve_justifier_absence():
     # Security: verify the absence belongs to this student
     absence = get_absence_by_id_for_eleve(absence_id, eleve_id)
     if not absence:
-        flash("Absence introuvable.", "danger")
+        flash("Absence introuvable ou vous n'avez pas la permission.", "danger")
         return redirect(url_for("eleve_absences"))
 
     # Check if a file was submitted
@@ -651,15 +651,22 @@ def eleve_justifier_absence():
         flash("Veuillez selectionner un fichier.", "danger")
         return redirect(url_for("eleve_absences"))
 
-    # Upload to Supabase Storage
-    result = upload_justification(eleve_id, fichier.read(), fichier.filename)
+    try:
+        # Upload to Supabase Storage
+        result = upload_justification(eleve_id, fichier.read(), fichier.filename)
 
-    if result["success"]:
-        # Save the URL in MySQL
-        submit_justification_eleve(absence_id, eleve_id, result["url"])
-        flash("Justificatif envoye avec succes. Il sera examine par l'administration.", "success")
-    else:
-        flash(f"Erreur lors de l'envoi : {result['error']}", "danger")
+        if result["success"]:
+            # Save the URL in MySQL
+            db_ok = submit_justification_eleve(absence_id, eleve_id, result["url"])
+            if db_ok:
+                flash("Justificatif envoye avec succes. Il sera examine par l'administration.", "success")
+            else:
+                flash("Fichier uploade mais erreur lors de la sauvegarde. Verifiez que la colonne 'fichier_justificatif' existe dans la table 'absence'.", "danger")
+        else:
+            flash(f"Erreur upload Supabase : {result['error']}", "danger")
+
+    except Exception as e:
+        flash(f"Erreur inattendue : {str(e)}", "danger")
 
     return redirect(url_for("eleve_absences"))
 
