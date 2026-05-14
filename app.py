@@ -1,7 +1,14 @@
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 from database import enregistrer_absence, enregistrer_notes_completes, get_affectations_professeur, get_eleves_par_classe, get_infos_professeur, get_infos_selection, get_notes_existantes, sauvegarder_note_individuelle, supprimer_notes_eleve, supprimer_notes_eleve, supprimer_notes_eleve, get_user_by_id, update_profil_prof
 from python.database import *
-from python.supabase_storage import upload_justification
+try:
+    from python.supabase_storage import upload_justification
+    SUPABASE_ENABLED = True
+except ImportError:
+    SUPABASE_ENABLED = False
+    def upload_justification(*args, **kwargs):
+        return {"success": False, "error": "Supabase non configure. Verifiez les dependances."}
+
 import os
 from dotenv import load_dotenv
 from flask import jsonify
