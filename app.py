@@ -225,6 +225,7 @@ def gestion_eleves():
         nom_tuteur = request.form.get("nom_tuteur")
         tel_tuteur = request.form.get("tel_tuteur")
         numero_eleve = generer_numero_eleve()
+        mot_de_passe=generate_password_hash(mot_de_passe)
         ajouter_eleve(nom, prenom, sexe, email, adresse, mot_de_passe, numero_eleve, date_naissance, nom_tuteur, tel_tuteur)
         return redirect(url_for("gestion_eleves"))
         
@@ -306,6 +307,7 @@ def gestion_profs():
         email = request.form.get("email")
         adresse = request.form.get("adresse")
         mot_de_passe = request.form.get("mot_de_passe")
+        mot_de_passe=generate_password_hash(mot_de_passe)
         
         # Nouvelles infos : Matière et Classe        
         # Appel de la fonction mise à jour

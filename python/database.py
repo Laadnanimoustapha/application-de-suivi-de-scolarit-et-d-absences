@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from datetime import datetime
 import random
+from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 
@@ -17,25 +18,70 @@ if DATABASE_KEY.startswith("mysql://"):
 engine = create_engine(DATABASE_KEY, pool_pre_ping=True, pool_recycle=300)
 
 def check_etudiant(email,password): # check if the student has an account 
-    with engine.connect() as conn:
-        # Students are stored in the utilisateur table with role = 'eleve'
-        query = text("SELECT id FROM utilisateur WHERE email = :email AND mot_de_passe = :password AND role = 'eleve'")
-        result = conn.execute(query,{"email" : email,"password" : password}).fetchone()
+    # N'oublie pas d'importer la fonction tout en haut de ton fichier
+    try:
+        with engine.connect() as conn:
+            # 1. On cherche SEULEMENT l'élève par son email et on récupère son mot de passe haché
+            query = text("""
+                SELECT id, mot_de_passe 
+                FROM utilisateur 
+                WHERE email = :email AND role = 'eleve'
+            """)
+            
+            resultat = conn.execute(query, {"email": email}).fetchone()
 
-        if result:
-            return result[0] # Return the ID
+            # Si on a trouvé un élève avec cet email
+            if resultat:
+                eleve_id = resultat[0]
+                mot_de_passe_hache_db = resultat[1] # Ressemble à "scrypt:32768:8:1$..."
+                
+                # 2. LA MAGIE EST ICI : On compare le hachage de la DB avec le mot de passe tapé
+                if check_password_hash(mot_de_passe_hache_db, password):
+                    # Si c'est True, le mot de passe est bon ! On retourne l'ID pour la session
+                    return eleve_id
+                else:
+                    # Le mot de passe est faux
+                    return None
+            else:
+                # L'email n'existe pas
+                return None
+                
+    except Exception as e:
+        print(f"Erreur lors du login : {e}")
         return None
 
 
 def check_professeur(email, password):
     try:
         with engine.connect() as conn:
-            # On sélectionne les colonnes nécessaires selon la table de Zakaria
-            query = text("SELECT id, nom, prenom FROM utilisateur WHERE email = :email AND mot_de_passe = :pw AND role = 'professeur'")
-            result = conn.execute(query, {"email": email, "pw": password}).mappings().fetchone()
-            return result # Retourne les données ou None
+            # 1. On cherche SEULEMENT par l'email (on enlève le mot de passe du WHERE)
+            # On ajoute "mot_de_passe" dans le SELECT pour pouvoir le récupérer et le comparer
+            query = text("""
+                SELECT id, nom, prenom, mot_de_passe 
+                FROM utilisateur 
+                WHERE email = :email AND role = 'professeur'
+            """)
+            
+            # mappings() permet d'accéder aux données comme un dictionnaire
+            result = conn.execute(query, {"email": email}).mappings().fetchone()
+            
+            # 2. Si on a trouvé un professeur avec cet email
+            if result:
+                # 3. On compare le hachage de la base avec le mot de passe tapé
+                if check_password_hash(result['mot_de_passe'], password):
+                    # Si c'est correct, on retourne un dictionnaire propre avec juste les infos utiles
+                    return {
+                        "id": result['id'],
+                        "nom": result['nom'],
+                        "prenom": result['prenom']
+                    }
+                    
+            # Si l'email n'existe pas, ou si le mot de passe est faux
+            return None
+            
     except Exception as e:
         print(f"Erreur base de données : {e}")
+        # Optionnel : Tu pourrais utiliser logging.exception(e) ici !
         return None
 #---------------------------------------------------------------------------------
 # ------------ LES METHODES DE L'ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
@@ -92,12 +138,15 @@ def generer_numero_eleve():
         with engine.connect() as conn:
             # On cherche le plus grand numéro qui commence par "EL-Annee-"
             query = text("""
-                SELECT numero_eleve 
-                FROM utilisateur 
-                WHERE numero_eleve LIKE :prefixe 
-                ORDER BY numero_eleve DESC 
-                LIMIT 1
-            """)
+    SELECT numero_eleve 
+    FROM utilisateur 
+    WHERE numero_eleve LIKE :prefixe 
+    -- 1. On coupe le texte au dernier tiret '-'
+    -- 2. On transforme le résultat en nombre (UNSIGNED)
+    -- 3. On trie du plus grand au plus petit
+    ORDER BY CAST(SUBSTRING_INDEX(numero_eleve, '-', -1) AS UNSIGNED) DESC 
+    LIMIT 1
+""")
             # fetchone() car on veut juste le premier résultat de la liste
             resultat = conn.execute(query, {"prefixe": f"{prefixe}%"}).fetchone()
 
@@ -517,18 +566,19 @@ def get_profs_par_classe(classe_id):
     except Exception as e:
         print(f"Erreur SQL profs par classe : {e}")
         return []
-def modifier_prof_db(prof_id, nom, prenom, sexe, email, adresse, mot_de_passe=None, matiere_id=None, classe_id=None):
+def modifier_prof_db(prof_id, nom, prenom, sexe, email, adresse, mot_de_passe, matiere_id=None, classe_id=None):
     """Sauvegarde les modifications (Infos + Matière/Classe)"""
     try:
         with engine.begin() as conn:
             # 1. On modifie les infos dans la table 'utilisateur'
             if mot_de_passe and mot_de_passe.strip() != "":
+                mdp_hash=generate_password_hash(mot_de_passe)
                 query_user = text("""
                     UPDATE utilisateur 
                     SET nom=:nom, prenom=:prenom, sexe=:sexe, email=:email, adresse=:adresse, mot_de_passe=:mdp
                     WHERE id=:id AND role='professeur'
                 """)
-                conn.execute(query_user, {"nom":nom, "prenom":prenom, "sexe":sexe, "email":email, "adresse":adresse, "mdp":mot_de_passe, "id":prof_id})
+                conn.execute(query_user, {"nom":nom, "prenom":prenom, "sexe":sexe, "email":email, "adresse":adresse, "mdp":mdp_hash, "id":prof_id})
             else:
                 query_user = text("""
                     UPDATE utilisateur 
