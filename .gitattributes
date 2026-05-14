@@ -1,0 +1,2 @@
+static/assets/*.png filter=lfs diff=lfs merge=lfs -text
+static/assets/*.ico filter=lfs diff=lfs merge=lfs -text
