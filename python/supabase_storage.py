@@ -1,11 +1,3 @@
-"""
-Supabase Storage utility module.
-
-Handles file uploads to the 'justifications' bucket in Supabase Storage.
-Files are stored with a unique path based on student ID and timestamp.
-The public URL is returned for storage in the MySQL database.
-"""
-
 import os
 import uuid
 from datetime import datetime
