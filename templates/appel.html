@@ -1,62 +1,101 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-danger text-white d-flex justify-content-between">
-            <h4><i class="fas fa-calendar-check"></i> Faire l'Appel</h4>
-            <span>{{ "11 Mai 2026" }}</span>
-        </div>
-        <div class="card-body">
-            <form action="/prof/valider-appel" method="POST">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Date de la séance</label>
-                        <input type="date" name="date_appel" class="form-control" value="2026-05-11" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Séance (Heure)</label>
-                        <select name="seance" class="form-control">
-                            <option>08:30 - 10:30</option>
-                            <option>10:30 - 12:30</option>
-                            <option>14:30 - 16:30</option>
-                            <option>16:30 - 18:30</option>
-                        </select>
-                    </div>
-                </div>
-
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nom de l'Étudiant</th>
-                            <th class="text-center">Statut</th>
-                            <th>Justification</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for eleve in eleves %}
-                        <tr>
-                            <td class="fw-bold">{{ eleve.nom }} {{ eleve.prenom }}</td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <input type="radio" class="btn-check" name="statut_{{ eleve.id }}" id="pres_{{ eleve.id }}" value="Présent" checked>
-                                    <label class="btn btn-outline-success btn-sm" for="pres_{{ eleve.id }}">P</label>
-
-                                    <input type="radio" class="btn-check" name="statut_{{ eleve.id }}" id="abs_{{ eleve.id }}" value="Absent">
-                                    <label class="btn btn-outline-danger btn-sm" for="abs_{{ eleve.id }}">A</label>
-                                </div>
-                            </td>
-                            <td>
-                                <select name="justification_{{ eleve.id }}" class="form-select form-select-sm">
-                                    <option value="Non justifiée">Non justifiée</option>
-                                    <option value="Justifiée">Justifiée</option>
-                                </select>
-                            </td>
-                        </tr>
+    <div class="card shadow-lg border-0">
+        <!-- En-tête stylisé -->
+        <div class="card-header bg-gradient bg-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Feuille d'Appel</h4>
+                
+                <div class="d-flex align-items-center bg-white bg-opacity-10 p-2 rounded">
+                    <label class="me-2 mb-0 fw-bold small text-uppercase">Classe :</label>
+                    <select class="form-select form-select-sm border-0 shadow-none" 
+                            style="width: 200px;"
+                            onchange="window.location.href='/prof/absences?classe_id=' + this.value">
+                        <option value="">-- Sélectionner --</option>
+                        {% for classe in classes %}
+                        <option value="{{ classe.id }}" {% if classe.id == classe_actuelle %}selected{% endif %}>
+                            {{ classe.nom_classe}}
+                        </option>
                         {% endfor %}
-                    </tbody>
-                </table>
-                <button type="submit" class="btn btn-danger w-100 mt-3">Enregistrer l'Appel</button>
-            </form>
+                    </select>
+                </div>
+                
+                <div class="text-end">
+                    <span class="badge bg-light text-dark"><i class="far fa-calendar-alt me-1"></i> 14 Mai 2026</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            {% if not classe_actuelle %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Veuillez choisir une classe pour commencer l'appel.</h5>
+                </div>
+            {% else %}
+                <form action="/prof/valider-appel" method="POST">
+                    <!-- Champ caché INDISPENSABLE pour Python -->
+                    <input type="hidden" name="classe_id" value="{{ classe_actuelle }}">
+
+                    <div class="row g-3 mb-4 p-3 bg-light rounded shadow-sm">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">DATE DE LA SÉANCE</label>
+                            <input type="date" name="date_appel" class="form-control border-0 shadow-sm" value="2026-05-14" required>
+                        </div>
+                        
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light text-uppercase small fw-bold">
+                                <tr>
+                                    <th style="width: 40%">Étudiant</th>
+                                    <th class="text-center" style="width: 30%">Statut de présence</th>
+                                    <th style="width: 30%">Justification</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eleve in eleves %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3 bg-soft-primary text-primary rounded-circle text-center" style="width: 35px; height: 35px; line-height: 35px; background: #e7f1ff;">
+                                                {{ eleve.nom[0] }}{{ eleve.prenom[0] }}
+                                            </div>
+                                            <span class="fw-bold">{{ eleve.nom }} {{ eleve.prenom }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group w-75" role="group">
+                                            <input type="radio" class="btn-check" name="statut_{{ eleve.id }}" id="pres_{{ eleve.id }}" value="Présent" checked>
+                                            <label class="btn btn-outline-success btn-sm py-2" for="pres_{{ eleve.id }}">PRÉSENT</label>
+
+                                            <input type="radio" class="btn-check" name="statut_{{ eleve.id }}" id="abs_{{ eleve.id }}" value="Absent">
+                                            <label class="btn btn-outline-danger btn-sm py-2" for="abs_{{ eleve.id }}">ABSENT</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select name="justification_{{ eleve.id }}" class="form-select form-select-sm border-0 bg-light">
+                                            <option value="Non justifiée">Sans motif</option>
+                                            <option value="Justifiée">Justifié (Certificat/Motif)</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-between">
+                        <a href="{{ url_for('prof_dash') }}" class="btn btn-light text-muted">
+                            <i class="fas fa-undo me-1"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary px-5 shadow">
+                            <i class="fas fa-check-circle me-2"></i> Enregistrer l'Appel définitif
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
         </div>
     </div>
 </div>
