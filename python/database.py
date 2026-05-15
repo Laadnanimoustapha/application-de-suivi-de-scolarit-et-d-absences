@@ -17,72 +17,7 @@ if DATABASE_KEY.startswith("mysql://"):
 
 engine = create_engine(DATABASE_KEY, pool_pre_ping=True, pool_recycle=300)
 
-def check_etudiant(email,password): # check if the student has an account 
-    # N'oublie pas d'importer la fonction tout en haut de ton fichier
-    try:
-        with engine.connect() as conn:
-            # 1. On cherche SEULEMENT l'élève par son email et on récupère son mot de passe haché
-            query = text("""
-                SELECT id, mot_de_passe 
-                FROM utilisateur 
-                WHERE email = :email AND role = 'eleve'
-            """)
-            
-            resultat = conn.execute(query, {"email": email}).fetchone()
 
-            # Si on a trouvé un élève avec cet email
-            if resultat:
-                eleve_id = resultat[0]
-                mot_de_passe_hache_db = resultat[1] # Ressemble à "scrypt:32768:8:1$..."
-                
-                # 2. LA MAGIE EST ICI : On compare le hachage de la DB avec le mot de passe tapé
-                if check_password_hash(mot_de_passe_hache_db, password):
-                    # Si c'est True, le mot de passe est bon ! On retourne l'ID pour la session
-                    return eleve_id
-                else:
-                    # Le mot de passe est faux
-                    return None
-            else:
-                # L'email n'existe pas
-                return None
-                
-    except Exception as e:
-        print(f"Erreur lors du login : {e}")
-        return None
-
-
-def check_professeur(email, password):
-    try:
-        with engine.connect() as conn:
-            # 1. On cherche SEULEMENT par l'email (on enlève le mot de passe du WHERE)
-            # On ajoute "mot_de_passe" dans le SELECT pour pouvoir le récupérer et le comparer
-            query = text("""
-                SELECT id, nom, prenom, mot_de_passe 
-                FROM utilisateur 
-                WHERE email = :email AND role = 'professeur'
-            """)
-            
-            # mappings() permet d'accéder aux données comme un dictionnaire
-            result = conn.execute(query, {"email": email}).mappings().fetchone()
-            
-            # 2. Si on a trouvé un professeur avec cet email
-            if result:
-                # 3. On compare le hachage de la base avec le mot de passe tapé
-                if check_password_hash(result['mot_de_passe'], password):
-                    # Si c'est correct, on retourne un dictionnaire propre avec juste les infos utiles
-                    return {
-                        "id": result['id'],
-                        "nom": result['nom'],
-                        "prenom": result['prenom']
-                    }
-                    
-            # Si l'email n'existe pas, ou si le mot de passe est faux
-            return None
-            
-    except Exception as e:
-        print(f"Erreur base de données : {e}")
-        # Optionnel : Tu pourrais utiliser logging.exception(e) ici !
-        return None
 #---------------------------------------------------------------------------------
 # ------------ LES METHODES DE L'ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
 # ---------------------------------------------------------------------------------
@@ -706,6 +641,39 @@ def get_donnees_bulletin(eleve_id, semestre):
 #---------------------------------------------------------------------------------
 # ------------ LES METHODES DE L'ESPACE ELEVE ------------
 # ---------------------------------------------------------------------------------
+
+def check_etudiant(email,password): # check if the student has an account 
+    # N'oublie pas d'importer la fonction tout en haut de ton fichier
+    try:
+        with engine.connect() as conn:
+            # 1. On cherche SEULEMENT l'élève par son email et on récupère son mot de passe haché
+            query = text("""
+                SELECT id, mot_de_passe 
+                FROM utilisateur 
+                WHERE email = :email AND role = 'eleve'
+            """)
+            
+            resultat = conn.execute(query, {"email": email}).fetchone()
+
+            # Si on a trouvé un élève avec cet email
+            if resultat:
+                eleve_id = resultat[0]
+                mot_de_passe_hache_db = resultat[1] # Ressemble à "scrypt:32768:8:1$..."
+                
+                # 2. LA MAGIE EST ICI : On compare le hachage de la DB avec le mot de passe tapé
+                if check_password_hash(mot_de_passe_hache_db, password):
+                    # Si c'est True, le mot de passe est bon ! On retourne l'ID pour la session
+                    return eleve_id
+                else:
+                    # Le mot de passe est faux
+                    return None
+            else:
+                # L'email n'existe pas
+                return None
+                
+    except Exception as e:
+        print(f"Erreur lors du login : {e}")
+        return None
 def get_absences_by_eleve(eleve_id):
     """Récupère toutes les absences d'un élève spécifique"""
     try:
@@ -759,6 +727,39 @@ def submit_justification_eleve(absence_id, eleve_id, file_url):
 # ---------------------------------------------------------------------------------
 # ------------ FONCTIONS ESPACE PROFESSEUR (migrées depuis database.py racine) ----
 # ---------------------------------------------------------------------------------
+
+def check_professeur(email, password):
+    try:
+        with engine.connect() as conn:
+            # 1. On cherche SEULEMENT par l'email (on enlève le mot de passe du WHERE)
+            # On ajoute "mot_de_passe" dans le SELECT pour pouvoir le récupérer et le comparer
+            query = text("""
+                SELECT id, nom, prenom, mot_de_passe 
+                FROM utilisateur 
+                WHERE email = :email AND role = 'professeur'
+            """)
+            
+            # mappings() permet d'accéder aux données comme un dictionnaire
+            result = conn.execute(query, {"email": email}).mappings().fetchone()
+            
+            # 2. Si on a trouvé un professeur avec cet email
+            if result:
+                # 3. On compare le hachage de la base avec le mot de passe tapé
+                if check_password_hash(result['mot_de_passe'], password):
+                    # Si c'est correct, on retourne un dictionnaire propre avec juste les infos utiles
+                    return {
+                        "id": result['id'],
+                        "nom": result['nom'],
+                        "prenom": result['prenom']
+                    }
+                    
+            # Si l'email n'existe pas, ou si le mot de passe est faux
+            return None
+            
+    except Exception as e:
+        print(f"Erreur base de données : {e}")
+        # Optionnel : Tu pourrais utiliser logging.exception(e) ici !
+        return None
 
 def get_eleves_par_classe(classe_id):
     try:
