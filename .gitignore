@@ -12,4 +12,4 @@ __pycache__/
 static/uploads/*
 Guide_RedactionRapportStagePFE.pdf
 get-pip.py
-
+ca.pem
