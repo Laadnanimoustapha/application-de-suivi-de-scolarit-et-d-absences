@@ -642,7 +642,7 @@ def get_absences_non_justifiees():
         with engine.connect() as conn:
             # On fait des jointures pour avoir le nom de l'élève, de la classe et de la matière
             query = text("""
-                SELECT a.id, u.nom, u.prenom, c.nom AS classe_nom, m.nom AS matiere_nom, a.date_absence 
+                SELECT a.id, u.nom, u.prenom, c.nom AS classe_nom, m.nom AS matiere_nom, a.date_absence, a.motif_justification, a.fichier_justificatif 
                 FROM absence a
                 JOIN utilisateur u ON a.eleve_id = u.id
                 JOIN classe_matiere cm ON a.classe_matiere_id = cm.id
@@ -655,21 +655,54 @@ def get_absences_non_justifiees():
     except Exception as e:
         print(f"Erreur SQL lecture absences : {e}")
         return []
-def justifier_absence_db(absence_id, motif):
+def justifier_absence_db(absence_id, motif, est_acceptee):
     """Met à jour l'absence pour la marquer comme justifiée avec son motif"""
     try:
         with engine.begin() as conn:
             query = text("""
-                UPDATE absence 
-                SET justifiee = TRUE, motif_justification = :motif 
+                UPDATE absence
+                -- On met à jour "justifiee" avec True (1) ou False (0) selon le bouton cliqué
+                SET justifiee = :est_acceptee, motif_justification = :motif
                 WHERE id = :id
             """)
-            conn.execute(query, {"id": absence_id, "motif": motif})
-            return True
+            conn.execute(query, {
+                "id": absence_id, 
+                "motif": motif, 
+                "est_acceptee": est_acceptee
+            })
+        return True
     except Exception as e:
         print(f"Erreur SQL justification absence : {e}")
         return False
 
+def get_donnees_bulletin(eleve_id, semestre):
+    """
+    Récupère les moyennes par matière pour un élève et un semestre donné.
+    Calcule automatiquement la moyenne des différents contrôles.
+    """
+    try:
+        with engine.connect() as conn:
+            query = text("""
+                SELECT 
+                    m.nom AS matiere,
+                    cm.coefficient,
+                    
+                    AVG(n.valeur) AS moyenne_matiere, -- Calcule la moyenne des contrôles
+                    u.nom AS prof_nom,
+                    u.prenom AS prof_prenom
+                FROM note n
+                JOIN classe_matiere cm ON n.classe_matiere_id = cm.id
+                JOIN matiere m ON cm.matiere_id = m.id
+                JOIN utilisateur u ON cm.professeur_id = u.id
+                WHERE n.eleve_id = :eleve_id AND n.semestre = :semestre
+                GROUP BY m.id, cm.coefficient, u.nom, u.prenom
+            """)
+            
+            resultats = conn.execute(query, {"eleve_id": eleve_id, "semestre": semestre}).mappings().fetchall()
+            return resultats
+    except Exception as e:
+        print(f"Erreur génération bulletin : {e}")
+        return []
 #---------------------------------------------------------------------------------
 # ------------ LES METHODES DE L'ESPACE ELEVE ------------
 # ---------------------------------------------------------------------------------
