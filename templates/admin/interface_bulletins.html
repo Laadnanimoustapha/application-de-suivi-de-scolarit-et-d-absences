@@ -62,7 +62,7 @@
                         <td class="ps-4 text-muted">{{ eleve.id }}</td>
                         <td class="fw-bold text-dark">{{ eleve.nom }} {{ eleve.prenom }}</td>
                         <td class="text-end pe-4">
-                            <a href="#" 
+                            <a href="{{ url_for('generer_bulletin', eleve_id=eleve.id, semestre=semestre_selec) }}" 
                                target="_blank" 
                                class="btn btn-outline-danger btn-sm fw-bold">
                                 <i class="bi bi-filetype-pdf me-1"></i> Générer {{ semestre_selec }}

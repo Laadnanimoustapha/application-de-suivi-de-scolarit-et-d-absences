@@ -537,13 +537,26 @@ def justifier_absence():
     absence_id = request.form.get("absence_id")
     motif = request.form.get("motif")
     
-    if absence_id and motif:
-        success = justifier_absence_db(absence_id, motif)
+    # 1. On lit quel bouton a été cliqué (accepter ou refuser)
+    action = request.form.get("action") 
+
+    if absence_id and action:
+        # On définit si c'est accepté ou refusé
+        est_acceptee = (action == "accepter")
+        
+        # On met à jour la base de données
+        success = justifier_absence_db(absence_id, motif, est_acceptee)
+        
         if success:
-            flash("✅ L'absence a été justifiée avec succès.", "success")
+            # 2. 🌟 LA CORRECTION EST ICI : On sépare les messages Flash !
+            if est_acceptee:
+                flash("✅ L'absence a été justifiée avec succès.", "success")
+            else:
+                # On met "warning" (jaune) ou "danger" (rouge) pour le refus
+                flash("⚠️ Le justificatif a été refusé.", "warning") 
         else:
             flash("❌ Erreur lors de la mise à jour de l'absence.", "danger")
-            
+
     return redirect(url_for("gestion_absences"))
 
 @app.route("/admin/configuration", methods=["GET", "POST"])
@@ -590,6 +603,39 @@ def interface_bulletins():
                            eleves=eleves, 
                            classe_selec=classe_selectionnee, 
                            semestre_selec=semestre_selectionne)
+
+@app.route("/admin/bulletin/generer/<int:eleve_id>/<semestre>")
+@admin_required
+def generer_bulletin(eleve_id, semestre):
+    # 1. Récupérer les infos de base (Tu as sûrement déjà une fonction pour ça)
+    eleve = get_eleve_by_id(eleve_id)
+    
+    # 2. Récupérer les moyennes par matière depuis notre nouvelle fonction
+    lignes_bulletin = get_donnees_bulletin(eleve_id, semestre)
+    
+    # 3. Récupérer les absences non justifiées
+    # absences = get_absences_non_justifiees(eleve_id) # À adapter avec ta fonction exacte
+    absences = 0 
+    
+    # 4. Calcul de la Moyenne Générale en Python
+    total_points = 0
+    total_coefs = 0
+    
+    for ligne in lignes_bulletin:
+        # On multiplie la moyenne de la matière par son coefficient
+        total_points += float(ligne['moyenne_matiere']) * float(ligne['coefficient'])
+        total_coefs += float(ligne['coefficient'])
+        
+    # On évite la division par zéro
+    moyenne_generale = round(total_points / total_coefs, 2) if total_coefs > 0 else 0.0
+
+    # 5. On envoie les données à la page du bulletin (sans le menu latéral)
+    return render_template("admin/bulletin_imprimable.html", 
+                           eleve=eleve, 
+                           lignes=lignes_bulletin, 
+                           moyenne_generale=moyenne_generale,
+                           absences=absences,
+                           semestre=semestre)
 # -----------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------

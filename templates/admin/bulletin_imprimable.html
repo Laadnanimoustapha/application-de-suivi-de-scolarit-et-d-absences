@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulletin - {{ eleve.nom }} {{ eleve.prenom }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* CONFIGURATION POUR L'IMPRESSION A4 */
+        @media print {
+            body { background-color: white !important; }
+            .no-print { display: none !important; }
+            .container { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            @page { size: A4; margin: 1.5cm; }
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .bulletin-card {
+            background: white;
+            padding: 40px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            min-height: 29.7cm; /* Hauteur A4 */
+        }
+
+        .header-school {
+            border-bottom: 2px solid #000;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+
+        .bulletin-title {
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 24px;
+            margin: 20px 0;
+            text-decoration: underline;
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .table-bulletin {
+            border: 2px solid #000;
+        }
+
+        .table-bulletin th {
+            background-color: #f2f2f2 !important;
+            border: 1px solid #000;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+        }
+
+        .table-bulletin td {
+            border: 1px solid #000;
+            padding: 8px;
+            vertical-align: middle;
+        }
+
+        .moyenne-generale-box {
+            border: 2px solid #000;
+            padding: 10px;
+            margin-top: 20px;
+            width: fit-content;
+            margin-left: auto;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .signature-section {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 200px;
+        }
+
+        .footer-note {
+            margin-top: 100px;
+            font-size: 12px;
+            font-style: italic;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="no-print text-center mb-4">
+        <button onclick="window.print()" class="btn btn-primary btn-lg">
+            <i class="bi bi-printer"></i> Imprimer le Bulletin
+        </button>
+        <a href="{{ url_for('interface_bulletins') }}" class="btn btn-secondary btn-lg">Retour</a>
+    </div>
+
+    <div class="bulletin-card mx-auto">
+        <div class="header-school d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="m-0">LYCÉE D'EXCELLENCE</h4>
+                <p class="m-0">Royaume du Maroc</p>
+                <p class="m-0">Année Scolaire: 2025/2026</p>
+            </div>
+            <div class="text-end">
+                <p class="m-0">Direction Provinciale</p>
+                <p class="m-0">Région : Casablanca-Settat</p>
+            </div>
+        </div>
+
+        <div class="bulletin-title">
+            Bulletin de Notes - {{ semestre }}
+        </div>
+
+        <div class="info-section row">
+            <div class="col-6">
+                <p><strong>Nom & Prénom :</strong> {{ eleve.nom }} {{ eleve.prenom }}</p>
+                <p><strong>Matricule :</strong> {{ eleve.numero_eleve }}</p>
+            </div>
+            <div class="col-6 text-end">
+                <p><strong>Classe :</strong> {{ eleve.classe_nom }}</p>
+                <p><strong>Date de naissance :</strong> {{ eleve.date_naissance }}</p>
+            </div>
+        </div>
+
+        <table class="table table-bulletin table-bordered">
+            <thead>
+                <tr>
+                    <th width="30%">Matières</th>
+                    <th width="10%">Coef.</th>
+                    <th width="15%">Moyenne /20</th>
+                    <th width="20%">Enseignant</th>
+                    <th width="25%">Observations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ligne in lignes %}
+                <tr>
+                    <td class="fw-bold">{{ ligne.matiere }}</td>
+                    <td class="text-center">{{ ligne.coefficient }}</td>
+                    <td class="text-center fw-bold">{{ "%.2f"|format(ligne.moyenne_matiere) }}</td>
+                    <td>{{ ligne.prof_nom }} {{ ligne.prof_prenom }}</td>
+                    <td>
+                        {% if ligne.moyenne_matiere >= 16 %}Très Bien
+                        {% elif ligne.moyenne_matiere >= 14 %}Bien
+                        {% elif ligne.moyenne_matiere >= 12 %}Assez Bien
+                        {% elif ligne.moyenne_matiere >= 10 %}Passable
+                        {% else %}Insuffisant
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="row align-items-start">
+            <div class="col-6">
+                <p><strong>Nombre d'absences :</strong> {{ absences }} heure(s)</p>
+                <p><strong>Assiduité :</strong> 
+                    {% if absences == 0 %}Excellente
+                    {% elif absences <= 4 %}Bonne
+                    {% else %}À surveiller
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-6">
+                <div class="moyenne-generale-box">
+                    MOYENNE GÉNÉRALE : {{ "%.2f"|format(moyenne_generale) }} / 20
+                </div>
+            </div>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-box">
+                <p>Le Tuteur</p>
+            </div>
+            <div class="signature-box">
+                <p>Le Professeur Principal</p>
+            </div>
+            <div class="signature-box">
+                <p>Cachet de l'Etablissement</p>
+                <div style="height: 80px;"></div>
+                <p><strong>Le Directeur</strong></p>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            Document généré automatiquement par le système de gestion scolaire le {{ now }}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
