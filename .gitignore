@@ -11,13 +11,5 @@ __pycache__/
 *.log
 static/uploads/*
 Guide_RedactionRapportStagePFE.pdf
-pdf_content.txt
-Rapport_Partie_Eleve.md
-generate_pdf.py
 get-pip.py
-generate_report.py
-guide_content.txt
-guide_content_utf8.txt
-Rapport_PFE_Role.html
-Rapport_PFE_Role.pdf
-read_pdf.py
+
