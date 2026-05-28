@@ -186,32 +186,27 @@ def update_profil():
 @app.route('/prof/absences')
 def faire_appel():
     user_id = session.get('user_id')
-    
-    # 1. RÉCUPÉRATION des données brutes
     affectations_brutes = get_affectations_professeur(user_id) 
     
-    # --- TRANSFORMATION POUR L'AFFICHAGE COMPLET ---
     mes_classes = []
     deja_ajoute = set()
 
     for aff in affectations_brutes:
-        # On crée le nom formaté : "2ème Bac Sciences A (Langue Française)"
-        nom_formate = f"{aff['nom_classe']} ({aff['nom_matiere']})"
+        # 1. On crée le nom complet
+        # Vérifiez que vos clés SQL sont bien 'nom_classe' et 'nom_matiere'
+        nom_complet = f"{aff['nom_classe']} ({aff['nom_matiere']})"
         
-        # On vérifie si on n'a pas déjà ajouté cette combinaison exacte
-        if nom_formate not in deja_ajoute:
-            # On ajoute une nouvelle clé 'nom_complet' au dictionnaire
-            aff['nom_complet'] = nom_formate
+        if nom_complet not in deja_ajoute:
+            # 2. On s'assure que la clé 'id' existe pour le HTML
+            # On utilise 'classe_id' (clé SQL habituelle) pour remplir 'id'
+            aff['id'] = aff['classe_id'] 
+            aff['nom_complet'] = nom_complet
             mes_classes.append(aff)
-            deja_ajoute.add(nom_formate)
-    # -----------------------------------------------
+            deja_ajoute.add(nom_complet)
     
     classe_id = request.args.get('classe_id', type=int)
-    eleves = []
-    if classe_id:
-        eleves = get_eleves_par_classe(classe_id)
+    eleves = get_eleves_par_classe(classe_id) if classe_id else []
     
-    # 2. ENVOI : On utilise maintenant 'mes_classes' avec les noms complets
     return render_template('appel.html', 
                            eleves=eleves, 
                            classes=mes_classes, 
