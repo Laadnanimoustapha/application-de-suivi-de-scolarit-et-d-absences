@@ -15,7 +15,8 @@
                         <option value="">-- Sélectionner --</option>
                         {% for classe in classes %}
                         <option value="{{ classe.id }}" {% if classe.id == classe_actuelle %}selected{% endif %}>
-                            {{ classe.nom_complet }} </option>
+                           {{ classe.nom_complet }} 
+                        </option>
                         {% endfor %}
                      </select>
                 </div>
@@ -86,7 +87,7 @@
                     </div>
                     
                     <div class="mt-4 pt-3 border-top d-flex justify-content-between">
-                       <a href="{{ url_for('prof_dash') }}" class="btn btn-secondary">
+                       <a href="/prof/dashboard" class="btn btn-secondary">
                            <i class="fas fa-arrow-left me-1"></i> Retour
                        </a>
     
