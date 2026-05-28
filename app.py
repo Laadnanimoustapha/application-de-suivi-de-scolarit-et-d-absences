@@ -186,23 +186,29 @@ def update_profil():
 @app.route('/prof/absences')
 def faire_appel():
     user_id = session.get('user_id')
+    # On récupère les données brutes
     affectations_brutes = get_affectations_professeur(user_id) 
     
     mes_classes = []
     deja_ajoute = set()
 
-    for aff in affectations_brutes:
-        # 1. On crée le nom complet
-        # Vérifiez que vos clés SQL sont bien 'nom_classe' et 'nom_matiere'
-        nom_complet = f"{aff['nom_classe']} ({aff['nom_matiere']})"
-        
-        if nom_complet not in deja_ajoute:
-            # 2. On s'assure que la clé 'id' existe pour le HTML
-            # On utilise 'classe_id' (clé SQL habituelle) pour remplir 'id'
-            aff['id'] = aff['classe_id'] 
-            aff['nom_complet'] = nom_complet
-            mes_classes.append(aff)
-            deja_ajoute.add(nom_complet)
+    if affectations_brutes:
+        for aff in affectations_brutes:
+            # Sécurité : on vérifie si les clés existent, sinon on met du texte vide
+            n_classe = aff.get('nom_classe', 'Classe inconnue')
+            n_matiere = aff.get('nom_matiere', 'Matière inconnue')
+            c_id = aff.get('classe_id') or aff.get('id')
+            
+            nom_formate = f"{n_classe} ({n_matiere})"
+            
+            if nom_formate not in deja_ajoute:
+                # On prépare l'objet pour le HTML
+                classe_data = {
+                    'id': c_id,
+                    'nom_complet': nom_formate
+                }
+                mes_classes.append(classe_data)
+                deja_ajoute.add(nom_formate)
     
     classe_id = request.args.get('classe_id', type=int)
     eleves = get_eleves_par_classe(classe_id) if classe_id else []
