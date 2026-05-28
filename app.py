@@ -187,18 +187,34 @@ def update_profil():
 def faire_appel():
     user_id = session.get('user_id')
     
-    # 1. RÉCUPÉRATION : Est-ce que cette variable contient des données ?
-    mes_classes = get_affectations_professeur(user_id) 
+    # 1. RÉCUPÉRATION des données brutes
+    affectations_brutes = get_affectations_professeur(user_id) 
+    
+    # --- TRANSFORMATION POUR L'AFFICHAGE COMPLET ---
+    mes_classes = []
+    deja_ajoute = set()
+
+    for aff in affectations_brutes:
+        # On crée le nom formaté : "2ème Bac Sciences A (Langue Française)"
+        nom_formate = f"{aff['nom_classe']} ({aff['nom_matiere']})"
+        
+        # On vérifie si on n'a pas déjà ajouté cette combinaison exacte
+        if nom_formate not in deja_ajoute:
+            # On ajoute une nouvelle clé 'nom_complet' au dictionnaire
+            aff['nom_complet'] = nom_formate
+            mes_classes.append(aff)
+            deja_ajoute.add(nom_formate)
+    # -----------------------------------------------
     
     classe_id = request.args.get('classe_id', type=int)
     eleves = []
     if classe_id:
         eleves = get_eleves_par_classe(classe_id)
     
-    # 2. ENVOI : Vérifie que tu as bien écrit 'classes=mes_classes'
+    # 2. ENVOI : On utilise maintenant 'mes_classes' avec les noms complets
     return render_template('appel.html', 
                            eleves=eleves, 
-                           classes=mes_classes, # <--- C'est le nom utilisé par le {% for %}
+                           classes=mes_classes, 
                            classe_actuelle=classe_id)
 
 @app.route("/prof/valider-appel", methods=["POST"])
