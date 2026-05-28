@@ -125,17 +125,27 @@ def valider_notes():
     liste_affectations = get_affectations_professeur(user_id)
 
     # 2. TRAITEMENT ET SAUVEGARDE DES NOTES
+    # 2. TRAITEMENT ET SAUVEGARDE DES NOTES
     ids_eleves = set(key.split("_")[1] for key in request.form.keys() if "_" in key)
     for e_id in ids_eleves:
         for i in range(1, 5):
             valeur = request.form.get(f"cc{i}_{e_id}")
             if valeur and valeur.strip() != "":
-                sauvegarder_note_individuelle(
-                    eleve_id=e_id,
-                    classe_matiere_id=cm_id,
-                    valeur=float(valeur),
-                    type_eval=f'cc{i}' # On utilise cc1, cc2, etc. pour correspondre à ton dictionnaire
-                )
+                try:
+                    note_float = float(valeur)
+                    # --- AJOUT DE LA VÉRIFICATION 0-20 ---
+                    if 0 <= note_float <= 20:
+                        sauvegarder_note_individuelle(
+                            eleve_id=e_id,
+                            classe_matiere_id=cm_id,
+                            valeur=note_float,
+                            type_eval=f'cc{i}'
+                        )
+                    else:
+                        flash(f"Note ignorée : {note_float} est hors de l'intervalle [0,20]", "danger")
+                    # -------------------------------------
+                except ValueError:
+                    flash("Une des notes saisies n'est pas un nombre valide.", "danger")
 
     # 3. RÉCUPÉRATION DES NOTES MISES À JOUR
     notes_existantes =get_notes_existantes(cm_id)
@@ -355,6 +365,19 @@ def route_modifier_note(id):
         valeur = request.form.get("valeur")
         type_eval = request.form.get("type_evaluation")
         semestre = request.form.get("semestre")
+        
+        try:
+            note_float = float(valeur)
+            # --- VÉRIFICATION 0-20 POUR L'ADMIN ---
+            if 0 <= note_float <= 20:
+                if modifier_note_db(id, note_float, type_eval, semestre):
+                    flash(" Note modifiée avec succès.", "success")
+                    return redirect(url_for('consulter_notes_eleve', id=note_actuelle['eleve_id']))
+            else:
+                flash("Erreur : La note doit être entre 0 et 20.", "danger")
+            # ---------------------------------------
+        except ValueError:
+            flash("Erreur : Veuillez saisir un nombre valide.", "danger")
         
         if modifier_note_db(id, valeur, type_eval, semestre):
             # On redirige vers la page des notes de l'élève
