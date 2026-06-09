@@ -341,7 +341,7 @@ def get_eleves_sans_classe():
     except Exception as e:
         print(f"Erreur SQL élèves sans classe : {e}")
         return []
-def affecter_eleve_db(eleve_id, classe_id):
+def affecter_eleve_db(eleve_ids, classe_id):
     """Insère l'élève dans la classe sélectionnée"""
     try:
         with engine.begin() as conn:
@@ -349,8 +349,9 @@ def affecter_eleve_db(eleve_id, classe_id):
                 INSERT INTO eleve_classe (eleve_id, classe_id)
                 VALUES (:e_id, :c_id)
             """)
-            conn.execute(query, {
-                "e_id": eleve_id, 
+            for e_id in eleve_ids:
+                conn.execute(query, {
+                "e_id": e_id, 
                 "c_id": classe_id
             })
             return True

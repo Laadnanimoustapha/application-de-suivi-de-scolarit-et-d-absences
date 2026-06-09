@@ -285,21 +285,44 @@ def logout():
 # ---------------------------------------------------------------------------------
 # ------------ESPACE ADMIN ------------ هنايا متقيسوهش ❗️
 # ---------------------------------------------------------------------------------
-@app.route("/admin/dashboard") # (Vérifie le nom exact de ta route)
+@app.route("/admin/dashboard")
 @admin_required
 def admin_dash():
-    # On calcule les vrais chiffres
-    total_eleves = compter_eleves()
-    total_profs = compter_profs()
-    total_absences = 0 # Temporaire, on l'automatisera plus tard !
+    try:
+        with engine.connect() as conn:
+            # 1. Total des Élèves
+            tot_eleves = conn.execute(text("SELECT COUNT(*) FROM utilisateur WHERE role = 'eleve'")).scalar()
+            
+            # 2. Total des Professeurs
+            tot_profs = conn.execute(text("SELECT COUNT(*) FROM utilisateur WHERE role = 'professeur'")).scalar()
+            
+            # 3. Absences Non Justifiées (justifiee = 0 ou False)
+            abs_non_justif = conn.execute(text("SELECT COUNT(*) FROM absence WHERE justifiee = 0 OR justifiee IS FALSE")).scalar()
+            
+            # 4. Justificatifs en attente (Fichier envoyé mais pas encore accepté ni refusé)
+            # On suppose que "justifiee" est NULL quand l'admin n'a pas encore pris de décision
+            justif_attente = conn.execute(text("SELECT COUNT(*) FROM absence WHERE fichier_justificatif IS NOT NULL AND justifiee IS NULL")).scalar()
+            
+            # 5. Élèves en attente d'affectation
+            # Attention: Remplace 'affectation_eleve' par le VRAI nom de ta table qui lie l'élève à la classe
+            eleves_sans_classe = conn.execute(text("""
+                SELECT COUNT(*) FROM utilisateur 
+                WHERE role = 'eleve' 
+                AND id NOT IN (SELECT eleve_id FROM eleve_classe)
+            """)).scalar()
 
-    # On envoie tout ça au template
+    except Exception as e:
+        print(f"Erreur lors du calcul des statistiques : {e}")
+        # En cas d'erreur, on met tout à zéro pour ne pas bloquer la page
+        tot_eleves = tot_profs = abs_non_justif = justif_attente = eleves_sans_classe = 0
+
+    # On envoie toutes ces variables au fichier HTML
     return render_template("admin/dashboard_admin.html", 
-                           total_eleves=total_eleves, 
-                           total_profs=total_profs, 
-                           total_absences=total_absences)
-# --- ROUTES GESTION ADMIN ---
-
+                           tot_eleves=tot_eleves,
+                           tot_profs=tot_profs,
+                           abs_non_justif=abs_non_justif,
+                           justif_attente=justif_attente,
+                           eleves_sans_classe=eleves_sans_classe)
 @app.route("/admin/eleves", methods=["GET", "POST"])
 @admin_required
 def gestion_eleves():
@@ -530,10 +553,10 @@ def gestion_assignations():
 @admin_required
 def affectation_eleves():
     if request.method == "POST":
-        eleve_id = request.form.get("eleve_id")
+        eleve_ids = request.form.getlist("eleves_ids")
         classe_id = request.form.get("classe_id")
 
-        if eleve_id and classe_id:
+        if eleve_ids and classe_id:
             # 1. On vérifie le nombre d'élèves actuels
             nombre_actuel = get_nombre_eleves_classe(classe_id)
             
@@ -542,7 +565,7 @@ def affectation_eleves():
                 flash("❌ Impossible : Cette classe est déjà complète (10/10).", "danger")
             else:
                 # 3. On affecte l'élève
-                success = affecter_eleve_db(eleve_id, classe_id)
+                success = affecter_eleve_db(eleve_ids, classe_id)
                 if success:
                     flash("✅ L'élève a été affecté avec succès !", "success")
                 else:

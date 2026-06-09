@@ -22,19 +22,24 @@
                 <form method="POST">
                     
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Élève en attente d'affectation</label>
-                        <select name="eleve_id" class="form-select bg-light" required>
-                            <option value="" disabled selected>Sélectionner un élève...</option>
+                        <label class="form-label text-muted small fw-bold">Élèves en attente d'affectation</label>
+                        
+                        <div class="border rounded p-3 bg-white" style="max-height: 220px; overflow-y: auto;">
                             {% for eleve in eleves %}
-                                <option value="{{ eleve.id }}">
-                                    {{ eleve.nom }} {{ eleve.prenom }} ({{ eleve.numero_eleve }})
-                                </option>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="eleves_ids" value="{{ eleve.id }}" id="eleve_{{ eleve.id }}">
+                                    <label class="form-check-label" style="cursor: pointer;" for="eleve_{{ eleve.id }}">
+                                        {{ eleve.nom }} {{ eleve.prenom }} <span class="text-muted">({{ eleve.numero_eleve }})</span>
+                                    </label>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-3">
+                                    <i class="bi bi-check-circle text-success mb-2" style="font-size: 2rem; display: block;"></i>
+                                    <span class="text-success fw-bold">Tous les élèves ont déjà une classe !</span>
+                                </div>
                             {% endfor %}
-                        </select>
-                        {% if not eleves %}
-                            <small class="text-success"><i class="bi bi-check-circle"></i> Tous les élèves ont déjà une classe !</small>
-                        {% endif %}
-                    </div>
+                        </div>
+                        </div>
 
                     <div class="mb-4">
                         <label class="form-label text-muted small fw-bold">Classe de destination</label>

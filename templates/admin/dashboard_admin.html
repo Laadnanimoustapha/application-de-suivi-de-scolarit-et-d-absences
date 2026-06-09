@@ -11,7 +11,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-people-fill text-primary fs-1"></i>
                         <h5 class="card-title mt-2">Élèves</h5>
-                        <p class="card-text fs-3 fw-bold">{{ total_eleves }}</p>
+                        <p class="card-text fs-3 fw-bold">{{ tot_eleves }}</p>
                     </div>
                 </div>
             </div>
@@ -21,7 +21,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-person-badge-fill text-success fs-1"></i>
                         <h5 class="card-title mt-2">Professeurs</h5>
-                        <p class="card-text fs-3 fw-bold">{{ total_profs }}</p>
+                        <p class="card-text fs-3 fw-bold">{{ tot_profs }}</p>
                     </div>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-calendar-x text-danger fs-1"></i>
                         <h5 class="card-title mt-2">Absences Non Justifiées</h5>
-                        <p class="card-text fs-3 fw-bold">{{ total_absences }}</p>
+                        <p class="card-text fs-3 fw-bold">{{ abs_non_justif }}</p>
                     </div>
                 </div>
             </div>
@@ -39,11 +39,11 @@
         <div class="card-body">
             <i class="bi bi-file-earmark-medical text-warning mb-3" style="font-size: 2.5rem;"></i>
             <h5 class="card-title text-muted fw-bold">Justificatifs en attente</h5>
-            <h2 class="fw-bold text-dark mb-0">{{ justificatifs_en_attente }}</h2>
+            <h2 class="fw-bold text-dark mb-0">{{ justif_attente }}</h2>
         </div>
     </div>
 
-<div class="col-md-4 mb-4">
+<!-- <div class="col-md-4 mb-4"> -->
     <div class="card border-0 shadow-sm text-center h-100 py-3">
         <div class="card-body">
             <i class="bi bi-person-x text-secondary mb-3" style="font-size: 2.5rem;"></i>
@@ -51,7 +51,7 @@
             <h2 class="fw-bold text-dark mb-0">{{ eleves_sans_classe }}</h2>
         </div>
     </div>
-</div>
+<!-- </div> -->
         </div>
 
         <!-- <div class="mt-5">
